@@ -1,7 +1,7 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
-let __debugLevel = 0; // 0: production
+let __debugLevel = 1; // 0: production
 const __log = (...args) => {
     if (__debugLevel > 0) console.log(...args);
 };
@@ -15,10 +15,10 @@ const Var2EsmPlugin = require('webpack-var2esm-plugin');
 const createWpConfig = (params) => {
     const dirname = '.';
 
-    const modType = params.modtype ? params.modtype : 'umd';
-    const libName = params.libname ? params.libname : 'my-mod'; // or pkg.name
-    const libObjName = params.libobjname ? params.libobjname : 'MyMod'; // name for script tag loading
-    const outDir = path.resolve(params.outdir ? params.outdir : dirname);
+    const modType = params.modtype || 'umd';
+    const libName = params.libname || 'my-mod'; // or pkg.name
+    const libObjName = params.libobjname || 'MyMod'; // name for script tag loading
+    const outDir = path.resolve(params.outdir || dirname);
 
     const plugins = [];
     const isDev = modType === 'dev';
@@ -98,8 +98,8 @@ const createWpConfig = (params) => {
 
 class Ret {
     constructor(stdout, stderr) {
-        this.stdout = stdout ? stdout : '';
-        this.stderr = stderr ? stderr : '';
+        this.stdout = stdout || '';
+        this.stderr = stderr || '';
         this.error = undefined;
     }
     apiResult() {
