@@ -1,7 +1,7 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
-let __debugLevel = 1; // 0: production
+let __debugLevel = 0; // 0: production
 const __log = (...args) => {
     if (__debugLevel > 0) console.log(...args);
 };
@@ -88,13 +88,13 @@ class EsPack {
             .argv;
     }
 
-    static createWpConfig(params) {
+    static _createWpConfig(wpSeed) {
         const dirname = '.';
 
-        const modType = params.modtype || 'umd';
-        const libName = params.libname || 'my-mod'; // or pkg.name
-        const libObjName = params.libobjname || 'MyMod'; // name for script tag loading
-        const outDir = path.resolve(params.outdir || dirname);
+        const modType = wpSeed.modtype || 'umd';
+        const libName = wpSeed.libname || 'my-mod'; // or pkg.name
+        const libObjName = wpSeed.libobjname || 'MyMod'; // name for script tag loading
+        const outDir = path.resolve(wpSeed.outdir || dirname);
 
         const plugins = [];
         const isDev = modType === 'dev';
@@ -171,21 +171,39 @@ class EsPack {
             plugins
         };
     }
+    static createWpConfig(wpSeed) {
+        const wpConfig = this._createWpConfig(wpSeed);
+        const extConfigPath = path.resolve('./es-pack.config.js');
+        try {
+            // TODO existence check !!!!
+            const cb = require(extConfigPath).onConfigCreated;
+            if (cb) cb(wpConfig);
+        } catch (err) {
+            __log('@@ err:', err);
+        }
+        __log('@@ wpConfig:', wpConfig);
+        return wpConfig;
+    }
 
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
-
-        for (let modtype of this.config.modarray) {
-            console.log('!! modtype:', modtype);
-        }
-        return; // !!!!!!!!
-
-        const throwOnError = ! asApi;
-        return await EsPack.runTasks([
-            ['runWebpack', async () => EsPack.runWebpack(this.config, throwOnError)],
-            //...
+        const tasks = this.config.modarray.map(modtype => {
+            const seed = Object.assign({}, this.config, { modtype });
+            delete seed['modarray'];
+            // console.log('seed:', seed);
+            return seed;
+        }).map(seed => [
+            'run-webpack', async () => EsPack.runWebpack(EsPack.createWpConfig(seed), !asApi /* throwOnError */)
         ]);
+
+        return await EsPack.runTasks(tasks);
+        //====
+        // return await EsPack.runTasks([
+        //     ['task-foo', async () => EsPack.runFoo(..., !asApi /* throwOnError */)],
+        //     ['task-bar', async () => EsPack.runBar(..., !asApi /* throwOnError */)],
+        //     //...
+        // ]);
     }
 
     static async runTasks(tasks) {
@@ -213,19 +231,8 @@ class EsPack {
             });
         });
     }
-    static async runWebpack(config, throwOnError) {
+    static async runWebpack(wpConfig, throwOnError) {
         const ret = new Ret();
-
-        const wpConfig = this.createWpConfig(config);
-        const extConfigPath = path.resolve('./es-pack.config.js');
-        try {
-            // TODO existence check !!!!
-            const cb = require(extConfigPath).onConfigCreated;
-            if (cb) cb(wpConfig);
-        } catch (err) {
-            __log('@@ err:', err);
-        }
-        __log('@@ wpConfig:', wpConfig);
 
         const { output } = wpConfig;
         __log('@@ output.path:', output.path);
