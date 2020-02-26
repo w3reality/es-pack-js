@@ -136,11 +136,12 @@ class EsPack {
 
         const pkgName = require(path.resolve('./package.json')).name;
         this.config = {
-            modtype: _argv.dev ? 'dev' : _argv.modType,
+            modarray: _argv.dev ? ['dev'] : _argv.module,
             libname: pkgName, // e.g. 'foo-bar-js'
             libobjname: EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: './target',
         };
+        __log('@@ this.config:', this.config);
     }
 
     static toUnderscores(str) { return str.split('-').join('_'); }
@@ -159,10 +160,10 @@ class EsPack {
         return yargs
             .usage('usage: $0 [options]')
             //
-            .describe('mod-type', 'Set output module type (umd, esm, esm-compat)')
-            .nargs('mod-type', 1)
-            .default('mod-type', 'umd')
-            .alias('m', 'mod-type')
+            .describe('module', 'Set output module type (umd, esm, esm-compat)')
+            .array('module') // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
+            .default('module', 'umd')
+            .alias('m', 'module')
             //
             .describe('dev', 'Toggle the behavior as `webpack --mode development --watch`')
             .boolean('dev')
@@ -174,16 +175,15 @@ class EsPack {
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
-        const config = this.config;
-        __log('@@ config:', this.config);
-        if (! config) {
-            console.error('_run(): config is invalid, bye.');
-            return;
+
+        for (let modtype of this.config.modarray) {
+            console.log('!! modtype:', modtype);
         }
+        return; // !!!!!!!!
 
         const throwOnError = ! asApi;
         return await EsPack.runTasks([
-            ['runWebpack', async () => EsPack.runWebpack(config, throwOnError)],
+            ['runWebpack', async () => EsPack.runWebpack(this.config, throwOnError)],
             //...
         ]);
     }
