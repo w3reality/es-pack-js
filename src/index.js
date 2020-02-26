@@ -1,7 +1,7 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
-let __debugLevel = 1; // 0: production
+let __debugLevel = 0; // 0: production
 const __log = (...args) => {
     if (__debugLevel > 0) console.log(...args);
 };
@@ -48,6 +48,9 @@ class EsPack {
         }
 
         const _argv = yargs ? EsPack.processYargs(yargs) : argv;
+        if (_argv.debug) {
+            __debugLevel = 1;
+        }
         __log('@@ _argv:', _argv);
 
         const pkgName = require(path.resolve('./package.json')).name;
@@ -84,6 +87,10 @@ class EsPack {
             .describe('dev', 'Toggle the behavior as `webpack --mode development --watch`')
             .boolean('dev')
             .default('dev', false)
+            //
+            .describe('debug', 'Print debug log and keep intermediate output')
+            .boolean('debug')
+            .default('debug', false)
             //
             .argv;
     }
