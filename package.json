@@ -36,6 +36,7 @@
         "fs-extra": "^8.1.0",
         "regenerator": "^0.14.2",
         "terser-webpack-plugin": "^2.2.2",
+        "toml": "^3.0.0",
         "webpack": "^4.41.2",
         "webpack-bundle-analyzer": "^3.3.2",
         "webpack-cli": "^3.3.9",

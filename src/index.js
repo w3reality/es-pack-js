@@ -12,6 +12,9 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const Var2EsmPlugin = require('webpack-var2esm-plugin');
 
+const toml = require('toml');
+
+
 class Ret {
     constructor(stdout, stderr) {
         this.stdout = stdout || '';
@@ -53,14 +56,40 @@ class EsPack {
         }
         __log('@@ _argv:', _argv);
 
-        const pkgName = require(path.resolve('./package.json')).name;
+        const basedir = _argv._[0] || '.';
+
+        let pkgName = 'no-pkg-name';
+        try {
+            pkgName = _argv.rustwasm ?
+                EsPack.resolveCrateName(basedir) :
+                EsPack.resolveNpmName(basedir);
+        } catch (err) {
+            __log('@@ err:', err);
+        }
+
+        if (_argv.rustwasm) {
+            // STUB !!!!!!!!
+            throw 'WIP: bye for now!!';
+        }
+
         this.config = {
             modarray: _argv.dev ? ['dev'] : _argv.module,
-            libname: pkgName, // e.g. 'foo-bar-js'
-            libobjname: EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
-            outdir: _argv.outDir,
+            libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
+            libobjname: _argv.libobjName || EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
+            outdir: _argv.outDir || `${basedir}/target`,
+            basedir,
         };
         __log('@@ this.config:', this.config);
+    }
+
+    static resolveNpmName(basedir) {
+        return require(path.resolve(`${basedir}/package.json`)).name;
+    }
+    static resolveCrateName(basedir) {
+        const parsed = toml.parse(
+            fs.readFileSync(path.resolve(`${basedir}/Cargo.toml`), 'utf8'));
+        // __log('parsed:', parsed);
+        return parsed.package.name;
     }
 
     static toUnderscores(str) { return str.split('-').join('_'); }
@@ -77,21 +106,32 @@ class EsPack {
 
     static processYargs(yargs) {
         return yargs
-            .usage('usage: $0 [options]')
+            .usage('usage: $0 [<path>=.] [Options]')
+            //
+            .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
             //
             .describe('module', 'Set output module type (`umd`, `esm`, `esm-compat`)')
             .array('module') // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
             .default('module', 'umd')
             .alias('m', 'module')
             //
-            .describe('dev', 'Toggle the behavior as `webpack --mode development --watch`')
+            .describe('dev', 'Toggle behavior as `webpack --mode development --watch`')
             .boolean('dev')
             .default('dev', false)
             //
-            .describe('out-dir', 'Set output directory')
+            .describe('out-dir', 'Set output directory (`<path>/target`, otherwise)')
             .nargs('out-dir', 1)
-            .default('out-dir', './target')
             .alias('d', 'out-dir')
+            //
+            .describe('lib-name', 'Set output module file name (e.g. "foo-bar-js")')
+            .nargs('lib-name', 1)
+            //
+            .describe('libobj-name', 'Set library object name (e.g. "FooBarJs")')
+            .nargs('libobj-name', 1)
+            //
+            .describe('rustwasm', 'Toggle `rustwasm` mode (WIP)')
+            .boolean('rustwasm')
+            .default('rustwasm', false)
             //
             .describe('debug', 'Print debug log and keep intermediate output')
             .boolean('debug')
@@ -101,12 +141,11 @@ class EsPack {
     }
 
     static _createWpConfig(wpSeed) {
-        const dirname = '.';
-
         const modType = wpSeed.modtype || 'umd';
         const libName = wpSeed.libname || 'my-mod'; // or pkg.name
         const libObjName = wpSeed.libobjname || 'MyMod'; // name for script tag loading
-        const outDir = path.resolve(wpSeed.outdir || dirname);
+        const outDir = path.resolve(wpSeed.outdir);
+        const baseDir = wpSeed.basedir;
 
         const plugins = [];
         const isDev = modType === 'dev';
@@ -129,7 +168,7 @@ class EsPack {
         return {
             mode: isDev ? 'development' : 'production',
             watch: isDev,
-            entry: path.resolve(dirname + '/src/index.js'),
+            entry: path.resolve(baseDir + '/src/index.js'),
             externals: { // https://webpack.js.org/configuration/externals/
             },
             output: {
@@ -175,8 +214,8 @@ class EsPack {
             },
             resolve: {
                 modules: [
-                    path.resolve(dirname + '/node_modules'),
-                    path.resolve(dirname + '/src')
+                    path.resolve(baseDir + '/node_modules'),
+                    path.resolve(baseDir + '/src')
                 ],
                 extensions: ['.json', '.js']
             },
