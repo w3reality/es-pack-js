@@ -333,18 +333,19 @@ class EsPack {
         }
     }
     static summarizeInfo(info, print) {
+        const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');
+
         // https://webpack.js.org/api/stats/
         __log(`@@ Hash: ${info.hash}`);
         __log(`@@ Version: webpack ${info.version}`);
         __log(`@@ Time: ${info.time}ms`);
-        print(`Output path: ${info.outputPath}`);
 
-        const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');
-        for (let asset of info.assets) {
-            print(`📦 ${asset.name} (${asset.size} bytes) ${_how(asset)} [${info.time} ms]`);
-        }
         for (let mod of info.modules) {
             print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
+        }
+        print(`Output path: ${info.outputPath}`);
+        for (let asset of info.assets) {
+            print(`📦 ${asset.name} (${asset.size} bytes) ${_how(asset)} [${info.time} ms]`);
         }
     }
 }
