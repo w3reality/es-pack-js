@@ -12,90 +12,6 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const Var2EsmPlugin = require('webpack-var2esm-plugin');
 
-const createWpConfig = (params) => {
-    const dirname = '.';
-
-    const modType = params.modtype || 'umd';
-    const libName = params.libname || 'my-mod'; // or pkg.name
-    const libObjName = params.libobjname || 'MyMod'; // name for script tag loading
-    const outDir = path.resolve(params.outdir || dirname);
-
-    const plugins = [];
-    const isDev = modType === 'dev';
-    let outputFile, minimize, target;
-    if (modType === 'umd' || isDev) {
-        minimize = !isDev;
-        outputFile = `${libName}${isDev ? '.js' : '.min.js'}`;
-        target = 'umd';
-    } else if (modType === 'esm' || modType === 'esm-compat') {
-        const isCompat = modType.endsWith('-compat');
-        minimize = true;
-        outputFile = libName + (isCompat ? '.esm.compat.js' : '.esm.js');
-        target = 'var';
-        plugins.push(new Var2EsmPlugin(libObjName, outputFile, isCompat));
-    } else {
-        console.error('invalid modtype:', modType);
-        throw 'exiting...';
-    }
-
-    return {
-        mode: isDev ? 'development' : 'production',
-        watch: isDev,
-        entry: path.resolve(dirname + '/src/index.js'),
-        externals: { // https://webpack.js.org/configuration/externals/
-        },
-        output: {
-            path: outDir,
-            filename: outputFile,
-            library: libObjName,
-            libraryTarget: target,
-            libraryExport: 'default', // https://github.com/webpack/webpack/commit/de8fc51a6fe2aff3ea3a1c24d34d429897c3b694
-            umdNamedDefine: false, // must be 'false' for m to be resolved in require([''], (m) => {});
-            globalObject: 'typeof self !== \'undefined\' ? self : this' // https://github.com/webpack/webpack/issues/6522 - Can't create UMD build which can be required by Node
-        },
-        optimization: {
-            minimize: minimize,
-            minimizer: [
-                new TerserPlugin({
-                    terserOptions: {
-                        compress: {
-                            drop_console: true
-                        }
-                    }
-                })
-            ]
-        },
-        module: {
-            rules: [
-                {
-                    test: /(\.jsx|\.js)$/,
-                    loader: 'babel-loader',
-                    options: { // instead of .babelrc -- https://github.com/babel/babel-loader#usage
-                        presets: [['@babel/preset-env', {modules: false}]]
-                    },
-                    exclude: /(node_modules|bower_components)/
-                },
-                {
-                    test: /(\.jsx|\.js)$/,
-                    loader: 'eslint-loader',
-                    options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
-                        parser: 'babel-eslint'
-                    },
-                    exclude: /node_modules/
-                }
-            ]
-        },
-        resolve: {
-            modules: [
-                path.resolve(dirname + '/node_modules'),
-                path.resolve(dirname + '/src')
-            ],
-            extensions: ['.json', '.js']
-        },
-        plugins,
-    };
-};
-
 class Ret {
     constructor(stdout, stderr) {
         this.stdout = stdout || '';
@@ -172,6 +88,90 @@ class EsPack {
             .argv;
     }
 
+    static createWpConfig(params) {
+        const dirname = '.';
+
+        const modType = params.modtype || 'umd';
+        const libName = params.libname || 'my-mod'; // or pkg.name
+        const libObjName = params.libobjname || 'MyMod'; // name for script tag loading
+        const outDir = path.resolve(params.outdir || dirname);
+
+        const plugins = [];
+        const isDev = modType === 'dev';
+        let outputFile, minimize, target;
+        if (modType === 'umd' || isDev) {
+            minimize = !isDev;
+            outputFile = `${libName}${isDev ? '.js' : '.min.js'}`;
+            target = 'umd';
+        } else if (modType === 'esm' || modType === 'esm-compat') {
+            const isCompat = modType.endsWith('-compat');
+            minimize = true;
+            outputFile = libName + (isCompat ? '.esm.compat.js' : '.esm.js');
+            target = 'var';
+            plugins.push(new Var2EsmPlugin(libObjName, outputFile, isCompat));
+        } else {
+            console.error('invalid modtype:', modType);
+            throw 'exiting...';
+        }
+
+        return {
+            mode: isDev ? 'development' : 'production',
+            watch: isDev,
+            entry: path.resolve(dirname + '/src/index.js'),
+            externals: { // https://webpack.js.org/configuration/externals/
+            },
+            output: {
+                path: outDir,
+                filename: outputFile,
+                library: libObjName,
+                libraryTarget: target,
+                libraryExport: 'default', // https://github.com/webpack/webpack/commit/de8fc51a6fe2aff3ea3a1c24d34d429897c3b694
+                umdNamedDefine: false, // must be 'false' for m to be resolved in require([''], (m) => {});
+                globalObject: 'typeof self !== \'undefined\' ? self : this' // https://github.com/webpack/webpack/issues/6522 - Can't create UMD build which can be required by Node
+            },
+            optimization: {
+                minimize: minimize,
+                minimizer: [
+                    new TerserPlugin({
+                        terserOptions: {
+                            compress: {
+                                drop_console: true
+                            }
+                        }
+                    })
+                ]
+            },
+            module: {
+                rules: [
+                    {
+                        test: /(\.jsx|\.js)$/,
+                        loader: 'babel-loader',
+                        options: { // instead of .babelrc -- https://github.com/babel/babel-loader#usage
+                            presets: [['@babel/preset-env', {modules: false}]]
+                        },
+                        exclude: /(node_modules|bower_components)/
+                    },
+                    {
+                        test: /(\.jsx|\.js)$/,
+                        loader: 'eslint-loader',
+                        options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
+                            parser: 'babel-eslint'
+                        },
+                        exclude: /node_modules/
+                    }
+                ]
+            },
+            resolve: {
+                modules: [
+                    path.resolve(dirname + '/node_modules'),
+                    path.resolve(dirname + '/src')
+                ],
+                extensions: ['.json', '.js']
+            },
+            plugins
+        };
+    }
+
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
@@ -216,7 +216,7 @@ class EsPack {
     static async runWebpack(config, throwOnError) {
         const ret = new Ret();
 
-        const wpConfig = createWpConfig(config);
+        const wpConfig = this.createWpConfig(config);
         const extConfigPath = path.resolve('./es-pack.config.js');
         try {
             // TODO existence check !!!!
