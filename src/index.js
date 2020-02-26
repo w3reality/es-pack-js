@@ -58,7 +58,7 @@ class EsPack {
             modarray: _argv.dev ? ['dev'] : _argv.module,
             libname: pkgName, // e.g. 'foo-bar-js'
             libobjname: EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
-            outdir: './target',
+            outdir: _argv.outDir,
         };
         __log('@@ this.config:', this.config);
     }
@@ -79,7 +79,7 @@ class EsPack {
         return yargs
             .usage('usage: $0 [options]')
             //
-            .describe('module', 'Set output module type (umd, esm, esm-compat)')
+            .describe('module', 'Set output module type (`umd`, `esm`, `esm-compat`)')
             .array('module') // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
             .default('module', 'umd')
             .alias('m', 'module')
@@ -87,6 +87,11 @@ class EsPack {
             .describe('dev', 'Toggle the behavior as `webpack --mode development --watch`')
             .boolean('dev')
             .default('dev', false)
+            //
+            .describe('out-dir', 'Set output directory')
+            .nargs('out-dir', 1)
+            .default('out-dir', './target')
+            .alias('d', 'out-dir')
             //
             .describe('debug', 'Print debug log and keep intermediate output')
             .boolean('debug')
