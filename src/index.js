@@ -1,7 +1,7 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
-let __debugLevel = 0; // 0: production
+let __debugLevel = 1; // 0: production
 const __log = (...args) => {
     if (__debugLevel > 0) console.log(...args);
 };
@@ -173,14 +173,13 @@ class EsPack {
     }
     static createWpConfig(wpSeed) {
         const wpConfig = this._createWpConfig(wpSeed);
-        const extConfigPath = path.resolve('./es-pack.config.js');
-        try {
-            // TODO existence check !!!!
-            const cb = require(extConfigPath).onConfigCreated;
+
+        const ext = path.resolve('./es-pack.config.js');
+        if (fs.existsSync(ext)) {
+            const cb = require(ext).onConfigCreated;
             if (cb) cb(wpConfig);
-        } catch (err) {
-            __log('@@ err:', err);
         }
+
         __log('@@ wpConfig:', wpConfig);
         return wpConfig;
     }
@@ -210,7 +209,7 @@ class EsPack {
         const ret = new Ret();
         for (let task of tasks) {
             const [title, fn] = task;
-            ret.err(`${title}: 🌀 spinning...`);
+            ret.err(`\n${title}: 🌀 spinning...`);
             ret.log(await fn());
             if (ret.error) break;
             ret.err(`${title}: ✨ done`);
@@ -286,12 +285,12 @@ class EsPack {
         // https://webpack.js.org/api/stats/
         __log(`@@ Hash: ${info.hash}`);
         __log(`@@ Version: webpack ${info.version}`);
-        print(`Time: ${info.time}ms`);
+        __log(`@@ Time: ${info.time}ms`);
         print(`Output path: ${info.outputPath}`);
 
         const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');
         for (let asset of info.assets) {
-            print(`📦 ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
+            print(`📦 ${asset.name} (${asset.size} bytes) ${_how(asset)} [${info.time} ms]`);
         }
         for (let mod of info.modules) {
             print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
