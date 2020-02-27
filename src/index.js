@@ -1,6 +1,9 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
+const { version } = require('../package.json');
+console.log(`es-pack ${version}`);
+
 let __debugLevel = 0; // 0: production
 const __log = (...args) => {
     if (__debugLevel > 0) console.log(...args);
@@ -47,7 +50,7 @@ class EsPack {
     constructor(params={}) {
         const { yargs, argv } = params;
         if (!yargs && !argv) {
-            console.error('error: neither yargs nor argv is provided');
+            console.error('error: neither `yargs` nor `argv` is provided');
             return;
         }
 
