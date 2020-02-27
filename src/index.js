@@ -288,6 +288,12 @@ class EsPack {
             webpack(wpConfig, (err, stats) => {
                 if (err) return rej(err);
 
+                // for (let pi of wpConfig.plugins) {
+                //     if (pi.constructor.name === 'BundleAnalyzerPlugin') {
+                //         console.log('pi:', pi);
+                //     }
+                // }
+
                 if (wpConfig.watch) {
                     this.processWpStats(stats, console.log);
                     console.log('👀');
