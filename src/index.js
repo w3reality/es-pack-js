@@ -11,6 +11,7 @@ const fs = require('fs-extra');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const Var2EsmPlugin = require('webpack-var2esm-plugin');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const toml = require('toml');
 
@@ -78,6 +79,7 @@ class EsPack {
             libobjname: _argv.libobjName || EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
             basedir,
+            ba: _argv.ba,
         };
         __log('@@ this.config:', this.config);
     }
@@ -129,6 +131,11 @@ class EsPack {
             .describe('libobj-name', 'Set library object name (e.g. "FooBarJs")')
             .nargs('libobj-name', 1)
             //
+            .describe('bundle-analyzer', 'Enable `webpack-bundle-analyzer` plugin')
+            .boolean('bundle-analyzer')
+            .default('bundle-analyzer', false)
+            .alias('ba', 'bundle-analyzer')
+            //
             .describe('rustwasm', 'Toggle `rustwasm` mode (WIP)')
             .boolean('rustwasm')
             .default('rustwasm', false)
@@ -144,10 +151,15 @@ class EsPack {
         const modType = wpSeed.modtype || 'umd';
         const libName = wpSeed.libname || 'my-mod'; // or pkg.name
         const libObjName = wpSeed.libobjname || 'MyMod'; // name for script tag loading
-        const outDir = path.resolve(wpSeed.outdir);
+        const outDir = wpSeed.outdir;
         const baseDir = wpSeed.basedir;
 
         const plugins = [];
+
+        if (wpSeed.ba) {
+            plugins.push(new BundleAnalyzerPlugin());
+        }
+
         const isDev = modType === 'dev';
         let outputFile, minimize, target;
         if (modType === 'umd' || isDev) {
@@ -166,13 +178,14 @@ class EsPack {
         }
 
         return {
-            mode: isDev ? 'development' : 'production',
+            plugins,
             watch: isDev,
-            entry: path.resolve(baseDir + '/src/index.js'),
+            mode: isDev ? 'development' : 'production',
+            entry: path.resolve(`${baseDir}/src/index.js`),
             externals: { // https://webpack.js.org/configuration/externals/
             },
             output: {
-                path: outDir,
+                path: path.resolve(outDir),
                 filename: outputFile,
                 library: libObjName,
                 libraryTarget: target,
@@ -214,18 +227,17 @@ class EsPack {
             },
             resolve: {
                 modules: [
-                    path.resolve(baseDir + '/node_modules'),
-                    path.resolve(baseDir + '/src')
+                    path.resolve(`${baseDir}/node_modules`),
+                    path.resolve(`${baseDir}/src`)
                 ],
                 extensions: ['.json', '.js']
-            },
-            plugins
+            }
         };
     }
     static createWpConfig(wpSeed) {
         const wpConfig = this._createWpConfig(wpSeed);
 
-        const ext = path.resolve('./es-pack.config.js');
+        const ext = path.resolve(`${wpSeed.basedir}/es-pack.config.js`);
         if (fs.existsSync(ext)) {
             const cb = require(ext).onConfigCreated;
             if (cb) cb(wpConfig);
@@ -263,7 +275,7 @@ class EsPack {
             ret.err(`\n${title}: 🌀 spinning...`);
             ret.log(await fn());
             if (ret.error) break;
-            ret.err(`${title}: ✨ done`);
+            ret.err(`${title}: ✅ done`);
         }
         return ret.apiResult();
     }
@@ -305,6 +317,8 @@ class EsPack {
 
     static processWpStats(stats, print) {
         // https://webpack.js.org/api/node/
+        // https://webpack.js.org/api/node/#statstojsonoptions
+        // https://webpack.js.org/configuration/stats/
         const info = stats.toJson();
 
         // console.log('hasErrors, hasWarnings:', stats.hasErrors(), stats.hasWarnings());
@@ -340,12 +354,27 @@ class EsPack {
         __log(`@@ Version: webpack ${info.version}`);
         __log(`@@ Time: ${info.time}ms`);
 
-        for (let mod of info.modules) {
-            print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
-        }
-        print(`Output path: ${info.outputPath}`);
+        // console.log('!! Object.keys(info):', Object.keys(info));
+        // !! Object.keys(info): [
+        //   'errors',            'warnings',
+        //   'version',           'hash',
+        //   'time',              'builtAt',
+        //   'publicPath',        'outputPath',
+        //   'assetsByChunkName', 'assets',
+        //   'filteredAssets',    'entrypoints',
+        //   'namedChunkGroups',  'chunks',
+        //   'modules',           'filteredModules',
+        //   'logging',           'children'
+        // ]
+
+        // TODO get filtered module list as the 'standard' webpack output
+        // for (let mod of info.modules) {
+        //     print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
+        // }
+
+        print(`Time: ${info.time} ms | Output path: ${info.outputPath}`);
         for (let asset of info.assets) {
-            print(`📦 ${asset.name} (${asset.size} bytes) ${_how(asset)} [${info.time} ms]`);
+            print(`✨ ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
         }
     }
 }
