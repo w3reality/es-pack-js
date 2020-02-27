@@ -290,6 +290,7 @@ class EsPack {
 
                 if (wpConfig.watch) {
                     this.processWpStats(stats, console.log);
+                    console.log('👀');
                 } else {
                     res(stats);
                 }
