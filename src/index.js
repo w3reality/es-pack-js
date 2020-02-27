@@ -112,8 +112,8 @@ class EsPack {
     static processYargs(yargs) {
         return yargs
             .usage('usage: $0 [<path>=.] [Options]')
-            //
             .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
+            .alias('h', 'help')
             //
             .describe('module', 'Set output module type (`umd`, `esm`, `esm-compat`)')
             .array('module') // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
