@@ -17,7 +17,7 @@ beforeAll(() => {
         outDir,
         libName,
         libobjName,
-        module: ['umd'],
+        module: ['umd', 'esm'],
     };
     return (new EsPack({ argv })).runAsApi();
 });
@@ -54,7 +54,18 @@ test(`umd: ${libName}.min.js`, () => {
     expect(bar.num).toBe(42);
 });
 
-// test("bar", () => {
-//     console.log('bar: mod.r:', mod.r);
-//     expect(mod.add(1, 2)).toBe(3);
-// });
+test(`esm: ${libName}.mjs`, async () => {
+    const mjs = `${outDir}/${libName}.mjs`;
+    fs.copySync(`${outDir}/${libName}.esm.js`, mjs);
+
+    let hasErr = false;
+    try {
+        const index = path.join(__dirname, './index-node-esm.mjs');
+        const ret = await EsPack._execCommand(index);
+        console.log('ret:', ret);
+    } catch (_err) {
+        console.log('_err:', _err);
+        hasErr = true;
+    }
+    expect(hasErr).toBe(false);
+});

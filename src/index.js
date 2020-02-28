@@ -17,6 +17,7 @@ const Var2EsmPlugin = require('webpack-var2esm-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 const toml = require('toml');
+const { exec } = require('child_process');
 
 
 class Ret {
@@ -389,6 +390,18 @@ class EsPack {
         for (let asset of info.assets) {
             print(`✨ ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
         }
+    }
+
+    static _execCommand(command) {
+        return new Promise((res, rej) => {
+            exec(command, (error, stdout, stderr) => {
+                if (error !== null) {
+                    rej({ error, stdout, stderr });
+                } else {
+                    res({ stdout, stderr });
+                }
+            });
+        });
     }
 }
 
