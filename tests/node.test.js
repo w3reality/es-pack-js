@@ -9,6 +9,8 @@ const libName = 'test-mod';
 const libobjName = 'TestMod';
 
 beforeAll(() => {
+    if (0) return console.error('!!!! skipping build !!!!');
+
     // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
     fs.removeSync(outDir);
 
@@ -17,7 +19,7 @@ beforeAll(() => {
         outDir,
         libName,
         libobjName,
-        module: ['umd', 'esm'],
+        module: ['umd', 'esm', 'esm-compat'],
     };
     return (new EsPack({ argv })).runAsApi();
 });
@@ -38,8 +40,7 @@ beforeAll(() => {
 //     done();
 // });
 
-test(`umd: ${libName}.min.js`, () => {
-    const Mod = require(`${outDir}/${libName}.min`);
+const testTestMod = Mod => {
     expect(Mod.hasOwnProperty('Foo')).toBe(true);
     expect(Mod.hasOwnProperty('Bar')).toBe(true);
 
@@ -52,15 +53,33 @@ test(`umd: ${libName}.min.js`, () => {
 
     const bar = new Bar();
     expect(bar.num).toBe(42);
+}
+
+test('umd: via `require()`', () => {
+    const Mod = require(`${outDir}/${libName}.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
+    console.log('Mod:', Mod);
+
+    testTestMod(Mod);
 });
 
-test(`esm: ${libName}.mjs`, async () => {
+test('esm-compat: via `require()`', () => {
+    const Mod = require(`${outDir}/${libName}.esm.compat`); // Mod: { default: { Foo: [Function: e], Bar: [Function: e] } }
+    // - also usable as UMD: https://github.com/w3reality/es6-esm-boilerplate#how-it-works
+    // - also usable in Observable
+
+    console.log('Mod:', Mod);
+    expect(Mod.hasOwnProperty('default')).toBe(true);
+
+    testTestMod(Mod.default);
+});
+
+test('umd, esm, esm-compat: via `import`', async () => {
     const mjs = `${outDir}/${libName}.mjs`;
     fs.copySync(`${outDir}/${libName}.esm.js`, mjs);
 
     let hasErr = false;
     try {
-        const index = path.join(__dirname, './index-node-esm.mjs');
+        const index = path.join(__dirname, './index.mjs');
         const ret = await EsPack._execCommand(index);
         console.log('ret:', ret);
     } catch (_err) {
