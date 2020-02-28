@@ -68,7 +68,7 @@ class EsPack {
                 EsPack.resolveCrateName(basedir) :
                 EsPack.resolveNpmName(basedir);
         } catch (err) {
-            __log('@@ err:', err);
+            __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
 
         if (_argv.rustwasm) {
@@ -77,12 +77,12 @@ class EsPack {
         }
 
         this.config = {
-            modarray: _argv.dev ? ['dev'] : _argv.module,
+            modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
             basedir,
-            ba: _argv.ba,
+            ba: _argv.ba || false,
         };
         __log('@@ this.config:', this.config);
     }
@@ -261,6 +261,9 @@ class EsPack {
         }).map(seed => [
             'run-webpack', async () => EsPack.runWebpack(EsPack.createWpConfig(seed), !asApi /* throwOnError */)
         ]);
+        __log('@@ tasks:', tasks);
+
+        // console.error('!! throwing !!'); throw 42;
 
         return await EsPack.runTasks(tasks);
         //====
