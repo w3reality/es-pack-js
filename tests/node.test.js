@@ -40,40 +40,19 @@ beforeAll(() => {
 //     done();
 // });
 
-const testTestMod = Mod => {
-    expect(Mod.hasOwnProperty('Foo')).toBe(true);
-    expect(Mod.hasOwnProperty('Bar')).toBe(true);
+test('umd, esm-compat: load via `require()`', () => {
+    const ModUmd = require(`${outDir}/${libName}.min`); // ModUmd: { Foo: [Function: e], Bar: [Function: e] }
+    console.log('ModUmd:', ModUmd);
 
-    const { Foo, Bar } = Mod;
-    expect(typeof Foo).toBe('function');
-    expect(typeof Bar).toBe('function');
-
-    const foo = new Foo();
-    expect(foo.add(1,2)).toBe(3);
-
-    const bar = new Bar();
-    expect(bar.num).toBe(42);
-}
-
-test('umd: via `require()`', () => {
-    const Mod = require(`${outDir}/${libName}.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
-    console.log('Mod:', Mod);
-
-    testTestMod(Mod);
-});
-
-test('esm-compat: via `require()`', () => {
-    const Mod = require(`${outDir}/${libName}.esm.compat`); // Mod: { default: { Foo: [Function: e], Bar: [Function: e] } }
+    const ModEsmCompat = require(`${outDir}/${libName}.esm.compat`); // ModEsmCompat: { default: { Foo: [Function: e], Bar: [Function: e] } }
+    console.log('ModEsmCompat:', ModEsmCompat);
     // - also usable as UMD: https://github.com/w3reality/es6-esm-boilerplate#how-it-works
     // - also usable in Observable
 
-    console.log('Mod:', Mod);
-    expect(Mod.hasOwnProperty('default')).toBe(true);
-
-    testTestMod(Mod.default);
+    expect(ModEsmCompat.hasOwnProperty('default')).toBe(true);
 });
 
-test('umd, esm, esm-compat: via `import`', async () => {
+test('umd, esm, esm-compat: load via `import`', async () => {
     const mjs = `${outDir}/${libName}.mjs`;
     fs.copySync(`${outDir}/${libName}.esm.js`, mjs);
 
@@ -87,4 +66,22 @@ test('umd, esm, esm-compat: via `import`', async () => {
         hasErr = true;
     }
     expect(hasErr).toBe(false);
+});
+
+test('umd: functionality (wrt. `test-mod`)', () => {
+    const Mod = require(`${outDir}/${libName}.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
+    console.log('Mod:', Mod);
+
+    expect(Mod.hasOwnProperty('Foo')).toBe(true);
+    expect(Mod.hasOwnProperty('Bar')).toBe(true);
+
+    const { Foo, Bar } = Mod;
+    expect(typeof Foo).toBe('function');
+    expect(typeof Bar).toBe('function');
+
+    const foo = new Foo();
+    expect(foo.add(1,2)).toBe(3);
+
+    const bar = new Bar();
+    expect(bar.num).toBe(42);
 });
