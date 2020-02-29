@@ -59,7 +59,7 @@ test('umd, esm, esm-compat: load via `import`', async () => {
     let hasErr = false;
     try {
         const index = path.join(__dirname, './index.mjs');
-        const ret = await EsPack._execCommand(index);
+        const ret = await EsPack._execCommand(`node --experimental-modules ${index}`);
         console.log('ret:', ret);
     } catch (_err) {
         console.log('_err:', _err);
