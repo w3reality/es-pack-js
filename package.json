@@ -8,7 +8,8 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "test": "jest"
+        "test": "jest && jest -c jest.config.browser.js",
+        "test-sf": "jest --silent false && jest -c jest.config.browser.js --silent false"
     },
     "repository": {
         "type": "git",
@@ -37,6 +38,8 @@
         "eslint-loader": "^3.0.0",
         "fs-extra": "^8.1.0",
         "jest": "^25.1.0",
+        "jest-puppeteer": "^4.4.0",
+        "puppeteer": "^2.1.1",
         "terser-webpack-plugin": "^2.2.2",
         "toml": "^3.0.0",
         "webpack": "^4.41.2",

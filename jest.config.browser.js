@@ -1,5 +1,6 @@
 module.exports = {
-    testMatch: ["<rootDir>/tests/node/**/*.test.js"],
+    preset: "jest-puppeteer",
+    testMatch: ["<rootDir>/tests/browser/**/*.test.js"],
     verbose: true, // display each test name
     silent: true, // supress console.log()
 };

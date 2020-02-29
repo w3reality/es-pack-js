@@ -1,9 +1,9 @@
 const path = require('path');
 const fs = require('fs-extra');
-const EsPack = require('../src/index');
+const EsPack = require('../../src/index');
 
 // console.log('__dirname:', __dirname);
-const testPkgPath = path.join(__dirname, '../examples/test');
+const testModPath = path.join(__dirname, '../../examples/test');
 const outDir = path.join(__dirname, './target');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
@@ -15,7 +15,7 @@ beforeAll(() => {
     fs.removeSync(outDir);
 
     const argv = {
-        _: [testPkgPath],
+        _: [testModPath],
         outDir,
         libName,
         libobjName,
