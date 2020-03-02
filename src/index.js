@@ -158,8 +158,13 @@ class EsPack {
                         default: false,
                         alias: 'ba',
                     },
+                    'verify': {
+                        describe: 'WIP: Verify basic assumptions for built modules',
+                        boolean: true,
+                        default: false,
+                    },
                     'rustwasm': {
-                        describe: 'Toggle `rustwasm` mode (WIP)',
+                        describe: 'WIP: Toggle `rustwasm` mode',
                         boolean: true,
                         default: false,
                     },

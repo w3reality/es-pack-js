@@ -1,27 +1,20 @@
 const path = require('path');
 const fs = require('fs-extra');
 const EsPack = require('../../src/index');
+const buildTestModule = require('../build');
 
-// console.log('__dirname:', __dirname);
-const testModPath = path.join(__dirname, '../../examples/test');
 const outDir = path.join(__dirname, './target');
-const libName = 'test-mod';
-const libobjName = 'TestMod';
+let libName, libobjName;
 
-beforeAll(() => {
+beforeAll(async () => {
     if (0) return console.error('!!!! skipping build !!!!');
 
     // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
     fs.removeSync(outDir);
 
-    const argv = {
-        _: ['build', testModPath],
-        outDir,
-        libName,
-        libobjName,
-        module: ['umd', 'esm', 'esm-compat'],
-    };
-    return (new EsPack({ argv })).runAsApi();
+    const ret = await buildTestModule(outDir);
+    libName = ret.libName;
+    libobjName = ret.libobjName;
 });
 
 // beforeEach(async done => {
