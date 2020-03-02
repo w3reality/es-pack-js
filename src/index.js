@@ -61,7 +61,14 @@ class EsPack {
         }
         __log('@@ _argv:', _argv);
 
-        const basedir = _argv._[0] || '.';
+        const cmd = _argv._[0];
+        if (cmd !== 'build') {
+            console.error(`error: unsupported command: ${cmd}`);
+            return;
+        }
+        __log('@@ cmd:', cmd);
+
+        const basedir = _argv._[1] || '.';
 
         let pkgName = 'no-pkg-name';
         try {
@@ -112,42 +119,57 @@ class EsPack {
 
     static processYargs(yargs) {
         return yargs
-            .usage('usage: $0 [<path>=.] [Options]')
-            .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
-            .alias('h', 'help')
-            //
-            .describe('module', 'Set output module type (`umd`, `esm`, `esm-compat`)')
-            .array('module') // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
-            .default('module', 'umd')
-            .alias('m', 'module')
-            //
-            .describe('dev', 'Toggle behavior as `webpack --mode development --watch`')
-            .boolean('dev')
-            .default('dev', false)
-            //
-            .describe('out-dir', 'Set output directory (`<path>/target`, otherwise)')
-            .nargs('out-dir', 1)
-            .alias('d', 'out-dir')
-            //
-            .describe('lib-name', 'Set output module file name (e.g. "foo-bar-js")')
-            .nargs('lib-name', 1)
-            //
-            .describe('libobj-name', 'Set library object name (e.g. "FooBarJs")')
-            .nargs('libobj-name', 1)
-            //
-            .describe('bundle-analyzer', 'Enable `webpack-bundle-analyzer` plugin')
-            .boolean('bundle-analyzer')
-            .default('bundle-analyzer', false)
-            .alias('ba', 'bundle-analyzer')
-            //
-            .describe('rustwasm', 'Toggle `rustwasm` mode (WIP)')
-            .boolean('rustwasm')
-            .default('rustwasm', false)
-            //
-            .describe('debug', 'Print debug log and keep intermediate output')
-            .boolean('debug')
-            .default('debug', false)
-            //
+            .usage('usage: $0 [Options] <Command>')
+            .demandCommand(1, '') // https://github.com/yargs/yargs/issues/895
+            .command('help', 'Show help')
+            .command('build', 'Build modules', yargs => yargs
+                .usage('usage: $0 build [<path>=.] [Options]')
+                .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
+                .alias('help', 'h')
+                .version(false)
+                .options({ // https://github.com/yargs/yargs/blob/master/docs/api.md#optionskey-opt
+                    'module': {
+                        describe: 'Set output module type (`umd`, `esm`, `esm-compat`)',
+                        array: true, // https://github.com/yargs/yargs/blob/master/docs/api.md#arraykey
+                        default: 'umd',
+                        alias: 'm',
+                    },
+                    'dev': {
+                        describe: 'Toggle behavior as `webpack --mode development --watch`',
+                        boolean: true,
+                        default: false,
+                    },
+                    'out-dir': {
+                        describe: 'Set output directory (`<path>/target`, otherwise)',
+                        nargs: 1,
+                        alias: 'd',
+                    },
+                    'lib-name': {
+                        describe: 'Set output module file name (e.g. "foo-bar-js")',
+                        nargs: 1,
+                    },
+                    'libobj-name': {
+                        describe: 'Set library object name (e.g. "FooBarJs")',
+                        nargs: 1,
+                    },
+                    'bundle-analyzer': {
+                        describe: 'Enable `webpack-bundle-analyzer` plugin',
+                        boolean: true,
+                        default: false,
+                        alias: 'ba',
+                    },
+                    'rustwasm': {
+                        describe: 'Toggle `rustwasm` mode (WIP)',
+                        boolean: true,
+                        default: false,
+                    },
+                    'debug': {
+                        describe: 'Print debug log and keep intermediate output',
+                        boolean: true,
+                        default: false,
+                    },
+                })
+            )
             .argv;
     }
 
@@ -254,6 +276,12 @@ class EsPack {
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
+        if (!this.config) {
+            console.error('invalid config, bye');
+            return;
+        }
+
+        // only the `build` command is supported for now
         const tasks = this.config.modarray.map(modtype => {
             const seed = Object.assign({}, this.config, { modtype });
             delete seed['modarray'];

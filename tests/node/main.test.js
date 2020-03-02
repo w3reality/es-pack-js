@@ -15,7 +15,7 @@ beforeAll(() => {
     fs.removeSync(outDir);
 
     const argv = {
-        _: [testModPath],
+        _: ['build', testModPath],
         outDir,
         libName,
         libobjName,
