@@ -79,18 +79,14 @@ class EsPack {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
 
-        if (_argv.rustwasm) {
-            // STUB !!!!!!!!
-            throw 'WIP: bye for now!!';
-        }
-
+        const { ba, verify, rustwasm } = _argv;
         this.config = {
+            basedir,
             modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
-            basedir,
-            ba: _argv.ba || false,
+            ba, verify, rustwasm,
         };
         __log('@@ this.config:', this.config);
     }
@@ -159,7 +155,7 @@ class EsPack {
                         alias: 'ba',
                     },
                     'verify': {
-                        describe: 'WIP: Verify basic assumptions for built modules',
+                        describe: 'WIP: Verify basic assumptions against built modules',
                         boolean: true,
                         default: false,
                     },
@@ -286,6 +282,12 @@ class EsPack {
             return;
         }
 
+        if (this.config.rustwasm) {
+            throw 'WIP: rustwasm';
+        }
+
+        const throwOnError = !asApi;
+
         // only the `build` command is supported for now
         const tasks = this.config.modarray.map(modtype => {
             const seed = Object.assign({}, this.config, { modtype });
@@ -293,11 +295,15 @@ class EsPack {
             // console.log('seed:', seed);
             return seed;
         }).map(seed => [
-            'run-webpack', async () => EsPack.runWebpack(EsPack.createWpConfig(seed), !asApi /* throwOnError */)
+            'run-webpack', async () => EsPack.runWebpack(EsPack.createWpConfig(seed), throwOnError)
         ]);
-        __log('@@ tasks:', tasks);
 
-        // console.error('!! throwing !!'); throw 42;
+        if (this.config.verify) {
+            const foo = 42;
+            tasks.push(['run-verify', async () => EsPack.runVerify(foo, throwOnError)]);
+        }
+
+        __log('@@ tasks:', tasks);
 
         return await EsPack.runTasks(tasks);
         //====
@@ -306,6 +312,15 @@ class EsPack {
         //     ['task-bar', async () => EsPack.runBar(..., !asApi /* throwOnError */)],
         //     //...
         // ]);
+    }
+
+    static async runVerify(foo, throwOnError) {
+        const ret = new Ret();
+
+        __log('@@ foo:', foo);
+        ret.err(`foo is ${foo}`);
+
+        return ret;
     }
 
     static async runTasks(tasks) {

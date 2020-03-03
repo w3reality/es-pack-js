@@ -71,6 +71,9 @@ test('esm: load via static/dynamic `import`', async () => {
 
     console.log('title:', await page.title());
 
+    let foo = await page.evaluate(() => window['foo']);
+    expect(foo).toBe(42);
+
     let Mod, ty;
 
     // static import
@@ -84,7 +87,4 @@ test('esm: load via static/dynamic `import`', async () => {
     console.log('Mod2:', Mod);
     ty = typeof Mod;
     expect(Mod.hasOwnProperty('default')).toBe(true);
-
-    let foo = await page.evaluate(() => window['foo']);
-    expect(foo).toBe(42);
 });
