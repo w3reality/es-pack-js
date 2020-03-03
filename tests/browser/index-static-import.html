@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>static import</title>
+</head>
+<body>
+    <script type="module">
+        import TestMod from './target/test-mod.esm.js';
+        window._TestMod = TestMod;
+
+        window.foo = 42;
+    </script>
+</body>
+</html>

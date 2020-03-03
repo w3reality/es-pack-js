@@ -1,13 +1,13 @@
 const path = require('path');
 const fs = require('fs-extra');
 const EsPack = require('../../src/index');
-const buildTestModule = require('../build');
+const { build: buildTestModule, pathRelTests } = require('../build');
 
-const outDir = path.join(__dirname, './target');
+const outDir = pathRelTests('node/target');
 let libName, libobjName;
 
 beforeAll(async () => {
-    if (0) return console.error('!!!! skipping build !!!!');
+    if (0) return console.error('!! skipping build !!');
 
     // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
     fs.removeSync(outDir);
@@ -16,22 +16,6 @@ beforeAll(async () => {
     libName = ret.libName;
     libobjName = ret.libobjName;
 });
-
-// beforeEach(async done => {
-//     mod = {r: Math.random(), add: (a, b) => a + b};
-//     console.log('beforeEach: new and init!! mod:', mod);
-//
-//     // await fetch();
-//     done();
-// });
-
-// afterEach(async done => {
-//     mod = null;
-//     console.log('afterEach: cleanup!! mod:', mod);
-//
-//     // await fetch();
-//     done();
-// });
 
 test('umd, esm-compat: load via `require()`', () => {
     const ModUmd = require(`${outDir}/${libName}.min`); // ModUmd: { Foo: [Function: e], Bar: [Function: e] }
@@ -51,7 +35,7 @@ test('umd, esm, esm-compat: load via `import`', async () => {
 
     let hasErr = false;
     try {
-        const index = path.join(__dirname, './index.mjs');
+        const index = pathRelTests('node/index.mjs');
         const ret = await EsPack._execCommand(`node --experimental-modules ${index}`);
         console.log('ret:', ret);
     } catch (_err) {

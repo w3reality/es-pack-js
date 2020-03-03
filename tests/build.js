@@ -1,11 +1,13 @@
 const path = require('path');
 const EsPack = require('../src/index');
 
-const testModPath = path.join(__dirname, '../examples/test');
+const pathRelTests = (rel) => path.join(__dirname, rel);
+
+const testModPath = pathRelTests('../examples/test');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
 
-const buildTestModule = async (outDir) => {
+const build = async (outDir) => {
     const argv = {
         _: ['build', testModPath],
         outDir,
@@ -17,4 +19,4 @@ const buildTestModule = async (outDir) => {
     return { libName, libobjName };
 };
 
-module.exports = buildTestModule;
+module.exports = { build, pathRelTests };
