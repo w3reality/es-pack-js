@@ -50,8 +50,8 @@ afterAll(async () => {
 test('umd: load via script tag', async () => {
     const page = await browser.newPage();
 
-    // await page.goto(`file:${pathRelTests('browser/index-script-tag.html')}`);
-    await page.goto(`http://localhost:${serv.port}/index-script-tag.html`);
+    // await page.goto(`file:${pathRelTests('browser/index-tag.html')}`);
+    await page.goto(`http://localhost:${serv.port}/index-tag.html`);
     console.log('title:', await page.title());
 
     console.log('libobjName:', libobjName); // TODO !!!! refactor `TestMod`
@@ -59,21 +59,32 @@ test('umd: load via script tag', async () => {
     expect(ret).toBe('object');
 });
 
-test('esm: load via static `import`', async () => {
+test('esm: load via static/dynamic `import`', async () => {
     const page = await browser.newPage();
 
     page.on('console', consoleObj => console.log(consoleObj.text())); // https://stackoverflow.com/questions/46198527/puppeteer-log-inside-page-evaluate
 
     // NG per CORS
-    // await page.goto(`file:${pathRelTests('browser/index-static-import.html')}`);
+    // await page.goto(`file:${pathRelTests('browser/index-import.html')}`);
     //====
-    await page.goto(`http://localhost:${serv.port}/index-static-import.html`);
+    await page.goto(`http://localhost:${serv.port}/index-import.html`);
 
     console.log('title:', await page.title());
 
-    let ret = await page.evaluate(() => typeof window['_TestMod']);
-    expect(ret).toBe('object');
+    let Mod, ty;
 
-    ret = await page.evaluate(() => window['foo']);
-    expect(ret).toBe(42);
+    // static import
+    Mod = await page.evaluate(() => window['Mod1']);
+    console.log('Mod1:', Mod);
+    ty = typeof Mod;
+    expect(ty === 'function' || ty === 'object').toBe(true);
+
+    // dynamic import
+    Mod = await page.evaluate(() => window['Mod2']);
+    console.log('Mod2:', Mod);
+    ty = typeof Mod;
+    expect(Mod.hasOwnProperty('default')).toBe(true);
+
+    let foo = await page.evaluate(() => window['foo']);
+    expect(foo).toBe(42);
 });

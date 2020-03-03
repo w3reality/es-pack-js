@@ -20,12 +20,13 @@ beforeAll(async () => {
 test('umd, esm-compat: load via `require()`', () => {
     const ModUmd = require(`${outDir}/${libName}.min`); // ModUmd: { Foo: [Function: e], Bar: [Function: e] }
     console.log('ModUmd:', ModUmd);
+    const ty = typeof ModUmd;
+    expect(ty === 'function' || ty === 'object').toBe(true);
 
     const ModEsmCompat = require(`${outDir}/${libName}.esm.compat`); // ModEsmCompat: { default: { Foo: [Function: e], Bar: [Function: e] } }
     console.log('ModEsmCompat:', ModEsmCompat);
     // - also usable as UMD: https://github.com/w3reality/es6-esm-boilerplate#how-it-works
     // - also usable in Observable
-
     expect(ModEsmCompat.hasOwnProperty('default')).toBe(true);
 });
 
@@ -38,14 +39,14 @@ test('umd, esm, esm-compat: load via `import`', async () => {
         const index = pathRelTests('node/index.mjs');
         const ret = await EsPack._execCommand(`node --experimental-modules ${index}`);
         console.log('ret:', ret);
-    } catch (_err) {
-        console.log('_err:', _err);
+    } catch (e) {
+        console.log('e.error:', e.error);
         hasErr = true;
     }
     expect(hasErr).toBe(false);
 });
 
-test('umd: functionality (wrt. `test-mod`)', () => {
+test('umd: functionality (specific to TestMod)', () => {
     const Mod = require(`${outDir}/${libName}.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
     console.log('Mod:', Mod);
 
