@@ -293,10 +293,10 @@ class EsPack {
             const seed = Object.assign({}, this.config, { modtype });
             delete seed['modarray'];
             // console.log('seed:', seed);
-            return seed;
-        }).map(seed => [
-            'run-webpack', async () => EsPack.runWebpack(EsPack.createWpConfig(seed), throwOnError)
-        ]);
+
+            const wpConfig = EsPack.createWpConfig(seed);
+            return ['run-webpack', async () => EsPack.runWebpack(wpConfig, throwOnError)];
+        });
 
         if (this.config.verify) {
             const foo = 42;
