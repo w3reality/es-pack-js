@@ -17,6 +17,7 @@ beforeAll(async () => {
     libobjName = ret.libobjName;
 });
 
+// TO BE REPLACED BY tests/node/verify.test.js
 test('umd, esm-compat: load via `require()`', () => {
     const ModUmd = require(`${outDir}/${libName}.min`); // ModUmd: { Foo: [Function: e], Bar: [Function: e] }
     console.log('ModUmd:', ModUmd);
@@ -30,6 +31,7 @@ test('umd, esm-compat: load via `require()`', () => {
     expect(ModEsmCompat.hasOwnProperty('default')).toBe(true);
 });
 
+// TO BE REPLACED BY tests/node/verify.test.js
 test('umd, esm, esm-compat: load via `import`', async () => {
     const mjs = `${outDir}/${libName}.mjs`;
     fs.copySync(`${outDir}/${libName}.esm.js`, mjs);
@@ -68,6 +70,7 @@ process.exit(0);
     }
     expect(hasErr).toBe(false);
 });
+
 
 test('umd: functionality (specific to TestMod)', () => {
     const Mod = require(`${outDir}/${libName}.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
