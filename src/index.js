@@ -61,12 +61,16 @@ class EsPack {
         }
         __log('@@ _argv:', _argv);
 
+        //
+
         const cmd = _argv._[0];
         if (cmd !== 'build') {
             console.error(`error: unsupported command: ${cmd}`);
             return;
         }
         __log('@@ cmd:', cmd);
+
+        //
 
         const basedir = _argv._[1] || '.';
 
@@ -78,6 +82,8 @@ class EsPack {
         } catch (err) {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
+
+        //
 
         const { ba, verify, rustwasm } = _argv;
         this.config = {
@@ -297,18 +303,28 @@ class EsPack {
         const throwOnError = !asApi;
 
         // only the `build` command is supported for now
-        const tasks = this.config.modarray.map(modtype => {
+
+        const tasks = [];
+        const cache = {};
+
+        for (let modtype of this.config.modarray) {
             const seed = Object.assign({}, this.config, { modtype });
             delete seed['modarray'];
             // console.log('seed:', seed);
 
             const wpConfig = EsPack.createWpConfig(seed);
-            return ['run-webpack', async () => EsPack.runWebpack(wpConfig, throwOnError)];
-        });
+            cache[modtype] = wpConfig;
+            tasks.push(['run-webpack', async () => EsPack.runWebpack(wpConfig, throwOnError)]);
+        }
 
         if (this.config.verify) {
-            const foo = 42;
-            tasks.push(['run-verify', async () => EsPack.runVerify(foo, throwOnError)]);
+            for (let [modtype, wpConfig] of Object.entries(cache)) {
+                if (modtype === 'dev') continue;
+
+                const { path, filename } = wpConfig.output;
+                const foo = { modtype, path, filename };
+                tasks.push(['run-verify', async () => EsPack.runVerify(foo, throwOnError)]);
+            }
         }
 
         __log('@@ tasks:', tasks);
