@@ -25,6 +25,19 @@ const createExpressServer = port => {
 };
 let serv = null;
 
+const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>__TITLE__</title>
+</head>
+<body>
+__BODY__
+</body>
+</html>
+`;
+
 beforeAll(async () => {
     if (0) {
         console.error('!! skipping build !!');
@@ -50,8 +63,14 @@ afterAll(async () => {
 test('umd: load via script tag', async () => {
     const page = await browser.newPage();
 
-    // await page.goto(`file:${pathRelTests('browser/index-tag.html')}`);
-    await page.goto(`http://localhost:${serv.port}/index-tag.html`);
+    const html = htmlTemplate
+        .replace('__TITLE__', 'script tag')
+        .replace('__BODY__', `<script src='./test-mod.min.js'></script>`);
+    fs.writeFileSync(`${outDir}/index-tag.html`, html);
+
+    // await page.goto(`file:${pathRelTests('browser/target/index-tag.html')}`);
+    await page.goto(`http://localhost:${serv.port}/target/index-tag.html`);
+
     console.log('title:', await page.title());
 
     console.log('libobjName:', libobjName); // TODO !!!! refactor `TestMod`
@@ -61,13 +80,29 @@ test('umd: load via script tag', async () => {
 
 test('esm: load via static/dynamic `import`', async () => {
     const page = await browser.newPage();
-
     page.on('console', consoleObj => console.log(consoleObj.text())); // https://stackoverflow.com/questions/46198527/puppeteer-log-inside-page-evaluate
 
+    const html = htmlTemplate
+        .replace('__TITLE__', 'static/dynamic import')
+        .replace('__BODY__', `
+<script type="module">
+    window.foo = 42;
+
+    import Mod1 from './test-mod.esm.js';
+    window.Mod1 = Mod1;
+
+    (async () => {
+        const Mod2 = await import('./test-mod.esm.js');
+        window.Mod2 = Mod2;
+    })();
+</script>
+        `);
+    fs.writeFileSync(`${outDir}/index-import.html`, html);
+
     // NG per CORS
-    // await page.goto(`file:${pathRelTests('browser/index-import.html')}`);
+    // await page.goto(`file:${pathRelTests('browser/target/index-import.html')}`);
     //====
-    await page.goto(`http://localhost:${serv.port}/index-import.html`);
+    await page.goto(`http://localhost:${serv.port}/target/index-import.html`);
 
     console.log('title:', await page.title());
 
