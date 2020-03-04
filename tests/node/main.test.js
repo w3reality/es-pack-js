@@ -34,10 +34,33 @@ test('umd, esm, esm-compat: load via `import`', async () => {
     const mjs = `${outDir}/${libName}.mjs`;
     fs.copySync(`${outDir}/${libName}.esm.js`, mjs);
 
+    const index = `
+let ty;
+
+import Mod from './test-mod.mjs'; // OK
+// import Mod from './test-mod.esm.js'; // NG!!
+console.log('Mod:', Mod);
+ty = typeof Mod;
+if (ty !== 'function' && ty !== 'object') throw 1;
+
+import ModEsmCompat from './test-mod.esm.compat.js'; // OK
+console.log('ModEsmCompat:', ModEsmCompat);
+ty = typeof ModEsmCompat;
+if (ty !== 'function' && ty !== 'object') throw 2;
+
+import ModUmd from './test-mod.min.js'; // OK
+console.log('ModUmd:', ModUmd);
+ty = typeof ModUmd;
+if (ty !== 'function' && ty !== 'object') throw 3;
+
+process.exit(0);
+    `;
+    fs.writeFileSync(`${outDir}/index.mjs`, index);
+
     let hasErr = false;
     try {
-        const index = pathRelTests('node/index.mjs');
-        const ret = await EsPack._execCommand(`node --experimental-modules ${index}`);
+        const ret = await EsPack._execCommand(
+            `node --experimental-modules ${outDir}/index.mjs`);
         console.log('ret:', ret);
     } catch (e) {
         console.log('e.error:', e.error);
