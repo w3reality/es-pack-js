@@ -117,7 +117,6 @@ class EsPack {
         return yargs
             .usage('usage: $0 [Options] <Command>')
             .demandCommand(1, '') // https://github.com/yargs/yargs/issues/895
-            .command('help', 'Show help')
             .command('build', 'Build modules', yargs => yargs
                 .usage('usage: $0 build [<path>=.] [Options]')
                 .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
@@ -171,6 +170,15 @@ class EsPack {
                     },
                 })
             )
+            .command('test', 'WIP: Test modules', yargs => yargs
+                .usage('usage: $0 test [<test-dir-path>=./tests] [Options]')
+                .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
+                .alias('help', 'h')
+                .version(false)
+                .options({
+                })
+            )
+            .command('help', 'Show help')
             .argv;
     }
 
