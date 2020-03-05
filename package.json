@@ -8,8 +8,8 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "test": "jest && jest -c jest.config.browser.js",
-        "test:sf": "jest --silent false && jest -c jest.config.browser.js --silent false"
+        "test": "jest ./tests/node/main.test.js && jest -c jest.config.browser.js ./tests/browser/main.test.js",
+        "test:sf": "echo TODO '--silent false'"
     },
     "repository": {
         "type": "git",

@@ -3,20 +3,16 @@ const EsPack = require('../src/index');
 
 const pathRelTests = (rel) => path.join(__dirname, rel);
 
-const testModPath = pathRelTests('../examples/test');
-const libName = 'test-mod';
-const libobjName = 'TestMod';
-
-const build = async (outDir) => {
+const build = async (args) => {
+    const { outDir, modPath, libName, libobjName } = args;
     const argv = {
-        _: ['build', testModPath],
+        _: ['build', modPath],
         outDir,
         libName,
         libobjName,
         module: ['umd', 'esm', 'esm-compat'],
     };
     await (new EsPack({ argv })).runAsApi();
-    return { libName, libobjName };
 };
 
 module.exports = { build, pathRelTests };
