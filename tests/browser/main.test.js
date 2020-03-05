@@ -1,36 +1,18 @@
 const path = require('path');
 const fs = require('fs-extra');
 const { build: buildTestModule, pathRelTests } = require('../build');
-// TODO !!!!
-// const { units } = require('./units');
-
-const outDir = pathRelTests('browser/target');
+const { units } = require('./units');
 
 const modPath = pathRelTests('../examples/test');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
 
+const outDir = pathRelTests('browser/target');
 const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
-const express = require('express');
-const createExpressServer = port => {
-    const _app = express();
-    _app.use('/', express.static(pathRelTests('browser')));
-
-    return new Promise((res, rej) => {
-        try {
-            const _server = _app.listen(port, 'localhost', () => {
-                const port = _server.address().port;
-                // console.log(`listening on port ${port}`);
-                res({ _app, _server, port });
-            });
-        } catch (err) {
-            rej(err);
-        }
-    });
-};
+const { createServer00 } = require('./server');
 let serv = null;
 
 const htmlTemplate = `
@@ -47,15 +29,14 @@ __BODY__
 `;
 
 beforeAll(async () => {
-    if (0) {
+    if (1) {
         console.error('!! skipping build !!');
     } else {
         fs.removeSync(outDir);
         await buildTestModule({ outDir, modPath, libName, libobjName });
     }
 
-    const port = 0; // 0: will search for an available port
-    serv = await createExpressServer(port);
+    serv = await createServer00(pathRelTests('browser'));
     console.log('serv.port:', serv.port);
 });
 

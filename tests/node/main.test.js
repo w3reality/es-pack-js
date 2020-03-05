@@ -3,12 +3,12 @@ const fs = require('fs-extra');
 const { build: buildTestModule, pathRelTests } = require('../build');
 const { units } = require('./units');
 
-const outDir = pathRelTests('node/target');
 
 const modPath = pathRelTests('../examples/test');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
 
+const outDir = pathRelTests('node/target');
 const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
