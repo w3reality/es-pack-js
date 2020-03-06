@@ -2,9 +2,33 @@ const os = require('os');
 const fs = require('fs-extra');
 const EsPack = require('../../src/index');
 
-const testImport = async (mod, snippet) => {
+const testImport = mode => async mod => {
     const indexPath = `${os.tmpdir()}/__index.mjs`;
-    fs.writeFileSync(indexPath, snippet);
+
+    const snippets = {
+        'static': `
+            import Mod from '${mod}';
+            console.log('static import -Mod:', Mod);
+            const ty = typeof Mod;
+            if (ty !== 'function' && ty !== 'object') throw 1;
+            process.exit(0);
+        `,
+        'dynamic': `
+            (async () => {
+                try {
+                    const Mod = (await import('${mod}')).default;
+                    console.log('dynamic import - Mod:', Mod);
+                    const ty = typeof Mod;
+                    if (ty !== 'function' && ty !== 'object') throw 1;
+                    process.exit(0);
+                } catch (e) {
+                    process.exit(1);
+                }
+            })();
+        `,
+    };
+
+    fs.writeFileSync(indexPath, snippets[mode]);
 
     let hasErr = false;
     try {
@@ -19,29 +43,12 @@ const testImport = async (mod, snippet) => {
 
     expect(hasErr).toBe(false);
 };
-const testImportStatic = async (mod) => {
-    await testImport(mod, `
-        import Mod from '${mod}';
-        console.log('static import -Mod:', Mod);
-        const ty = typeof Mod;
-        if (ty !== 'function' && ty !== 'object') throw 1;
-        process.exit(0);
-    `);
-};
-const testImportDynamic = async (mod) => {
-    await testImport(mod, `
-        (async () => {
-            try {
-                const Mod = (await import('${mod}')).default;
-                console.log('dynamic import - Mod:', Mod);
-                const ty = typeof Mod;
-                if (ty !== 'function' && ty !== 'object') throw 1;
-                process.exit(0);
-            } catch (e) {
-                process.exit(1);
-            }
-        })();
-    `);
+
+const testImportWithMjs = mode => async mod => {
+    const copy = `${os.tmpdir()}/__copy.mjs`;
+    fs.copySync(mod, copy);
+    await testImport(mode)(copy);
+    fs.removeSync(copy);
 };
 
 const units = {
@@ -51,24 +58,10 @@ const units = {
         const ty = typeof Mod;
         expect(ty === 'function' || ty === 'object').toBe(true);
     },
-    'umd-import-static': async (mod) => {
-        await testImportStatic(mod);
-    },
-    'umd-import-dynamic': async (mod) => {
-        await testImportDynamic(mod);
-    },
-    'esm-import-static': async (mod) => {
-        const copy = `${os.tmpdir()}/__copy.mjs`;
-        fs.copySync(mod, copy);
-        await testImportStatic(copy); // `.mjs` extension required
-        fs.removeSync(copy);
-    },
-    'esm-import-dynamic': async (mod) => {
-        const copy = `${os.tmpdir()}/__copy.mjs`;
-        fs.copySync(mod, copy);
-        await testImportDynamic(copy); // `.mjs` extension required
-        fs.removeSync(copy);
-    },
+    'umd-import-static': testImport('static'),
+    'umd-import-dynamic': testImport('dynamic'),
+    'esm-import-static': testImportWithMjs('static'),
+    'esm-import-dynamic': testImportWithMjs('dynamic'),
     'esm-compat-require': (mod) => {
         const Mod = require(mod); // Mod: { default: { Foo: [Function: e], Bar: [Function: e] } }
         console.log('require - Mod:', Mod);
@@ -76,12 +69,8 @@ const units = {
         // - also usable in Observable
         expect(Mod.hasOwnProperty('default')).toBe(true);
     },
-    'esm-compat-import-static': async (mod) => {
-        await testImportStatic(mod);
-    },
-    'esm-compat-import-dynamic': async (mod) => {
-        await testImportDynamic(mod);
-    },
+    'esm-compat-import-static': testImport('static'),
+    'esm-compat-import-dynamic': testImport('dynamic'),
 };
 
 module.exports = { units };
