@@ -7,12 +7,14 @@ class Server {
 
         this._app = app;
         this._serv = null;
+        this.port = -1;
     }
     listen(port=0) { // 0: will search for an available port
         return new Promise((res, rej) => {
             try {
-                const serv = _app.listen(port, 'localhost', () => {
-                    res(serv.address().port);
+                const serv = this._app.listen(port, 'localhost', () => {
+                    this.port = serv.address().port;
+                    res(this);
                 });
                 this._serv = serv;
             } catch (err) {
@@ -20,22 +22,9 @@ class Server {
             }
         });
     }
+    close() {
+        this._serv.close();
+    }
 }
-const createServer00 = (pathStatic, port=0) => {
-    const _app = express();
-    _app.use('/', express.static(pathStatic));
 
-    return new Promise((res, rej) => {
-        try {
-            const _server = _app.listen(port, 'localhost', () => {
-                const port = _server.address().port;
-                // console.log(`listening on port ${port}`);
-                res({ _app, _server, port });
-            });
-        } catch (err) {
-            rej(err);
-        }
-    });
-};
-
-module.exports = { createServer00 };
+module.exports = Server;

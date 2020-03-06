@@ -12,8 +12,8 @@ const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
-const { createServer00 } = require('./server');
-let serv = null;
+const Server = require('./server');
+let server = null;
 
 const htmlTemplate = `
 <!DOCTYPE html>
@@ -36,14 +36,14 @@ beforeAll(async () => {
         await buildTestModule({ outDir, modPath, libName, libobjName });
     }
 
-    serv = await createServer00(pathRelTests('browser'));
-    console.log('serv.port:', serv.port);
+    server = await (new Server(pathRelTests('browser'))).listen();
+    console.log('server.port:', server.port);
 });
 
 afterAll(async () => {
-    console.log('terminating `serv`!!');
-    serv._server.close();
-    serv = null;
+    console.log('closing server!!');
+    server.close();
+    server = null;
 });
 
 test('umd: load via script tag', async () => {
@@ -55,7 +55,7 @@ test('umd: load via script tag', async () => {
     fs.writeFileSync(`${outDir}/index-tag.html`, html);
 
     // await page.goto(`file:${pathRelTests('browser/target/index-tag.html')}`);
-    await page.goto(`http://localhost:${serv.port}/target/index-tag.html`);
+    await page.goto(`http://localhost:${server.port}/target/index-tag.html`);
 
     console.log('title:', await page.title());
 
@@ -88,7 +88,7 @@ test('esm: load via static/dynamic `import`', async () => {
     // NG per CORS
     // await page.goto(`file:${pathRelTests('browser/target/index-import.html')}`);
     //====
-    await page.goto(`http://localhost:${serv.port}/target/index-import.html`);
+    await page.goto(`http://localhost:${server.port}/target/index-import.html`);
 
     console.log('title:', await page.title());
 
