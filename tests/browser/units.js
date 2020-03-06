@@ -13,37 +13,38 @@ __BODY__
 </body>
 </html>
 `;
+const testTag = async (mod, libobjName, serveDir, port) => {
+    console.log('mod:', mod);
+    const copyFile = '__copy.min.js';
+    const copyPath = `${serveDir}/${copyFile}`;
+    fs.copySync(mod, copyPath);
+
+    const page = await browser.newPage();
+    const htmlFile = 'index-tag.html';
+    const htmlPath = `${serveDir}/${htmlFile}`;
+    const html = htmlTemplate
+        .replace('__TITLE__', 'script tag')
+        .replace('__BODY__', `<script src='./${copyFile}'></script>`);
+    fs.writeFileSync(htmlPath, html);
+
+    // await page.goto(`file:${htmlPath}`);
+    await page.goto(`http://localhost:${port}/${htmlFile}`);
+
+    console.log('title:', await page.title());
+    const ret = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
+    expect(ret).toBe('object');
+
+    fs.removeSync(htmlPath);
+    fs.removeSync(copyPath);
+};
 
 const units = {
-    'umd-tag': async (mod, libobjName, serveDir, port) => {
-        const copyFile = '__copy.min.js'
-        const copyPath = `${serveDir}/${copyFile}`;
-        fs.copySync(mod, copyPath);
-
-        const page = await browser.newPage();
-        const htmlFile = 'index-tag.html';
-        const htmlPath = `${serveDir}/${htmlFile}`;
-        const html = htmlTemplate
-            .replace('__TITLE__', 'script tag')
-            .replace('__BODY__', `<script src='./${copyFile}'></script>`);
-        fs.writeFileSync(htmlPath, html);
-
-        // await page.goto(`file:${htmlPath}`);
-        await page.goto(`http://localhost:${port}/${htmlFile}`);
-
-        console.log('title:', await page.title());
-        const ret = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
-        expect(ret).toBe('object');
-
-        fs.removeSync(htmlPath);
-        fs.removeSync(copyPath);
-    },
+    'umd-tag': async (...args) => await testTag(...args),
     'esm-import-static': async (mod) => {
     },
     'esm-import-dynamic': async (mod) => {
     },
-    'esm-compat-tag': async (mod) => {
-    },
+    'esm-compat-tag': async (...args) => await testTag(...args),
 };
 
 module.exports = { units };

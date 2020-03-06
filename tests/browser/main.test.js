@@ -35,6 +35,8 @@ afterAll(async () => {
 
 test('umd: tag', async () => units['umd-tag'](modUmd, libobjName, outDir, server.port));
 
+test('esm-compat: tag', async () => units['esm-compat-tag'](modEsmCompat, libobjName, outDir, server.port));
+
 // test('esm: load via static/dynamic `import`', async () => {
 //     const page = await browser.newPage();
 //     page.on('console', consoleObj => console.log(consoleObj.text())); // https://stackoverflow.com/questions/46198527/puppeteer-log-inside-page-evaluate
