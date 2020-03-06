@@ -3,7 +3,6 @@ const fs = require('fs-extra');
 const { build: buildTestModule, pathRelTests } = require('../build');
 const { units } = require('./units');
 
-
 const modPath = pathRelTests('../examples/test');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
@@ -21,10 +20,13 @@ beforeAll(async () => {
 });
 
 test('umd: require', () => units['umd-require'](modUmd));
-test('umd: import', async () => await units['umd-import'](modUmd));
-test('esm: import', async () => await units['esm-import'](modEsm));
+test('umd: static import', async () => await units['umd-import-static'](modUmd));
+test('umd: dynamic import', async () => await units['umd-import-dynamic'](modUmd));
+test('esm: static import', async () => await units['esm-import-static'](modEsm));
+test('esm: dynamic import', async () => await units['esm-import-dynamic'](modEsm));
 test('esm-compat: require', () => units['esm-compat-require'](modEsmCompat));
-test('esm-compat: import', async () => await units['esm-compat-import'](modEsmCompat));
+test('esm-compat: static import', async () => await units['esm-compat-import-static'](modEsmCompat));
+test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modEsmCompat));
 
 test('umd: functionality (specific to TestMod)', () => {
     const Mod = require(`${outDir}/test-mod.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
