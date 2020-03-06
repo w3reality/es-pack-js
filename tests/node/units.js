@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const EsPack = require('../../src/index');
 
 const testImport = async (mod, snippet) => {
-    const indexPath = `${os.tmpdir()}/index.mjs`;
+    const indexPath = `${os.tmpdir()}/__index.mjs`;
     fs.writeFileSync(indexPath, snippet);
 
     let hasErr = false;
@@ -58,13 +58,13 @@ const units = {
         await testImportDynamic(mod);
     },
     'esm-import-static': async (mod) => {
-        const copy = `${os.tmpdir()}/copy.mjs`;
+        const copy = `${os.tmpdir()}/__copy.mjs`;
         fs.copySync(mod, copy);
         await testImportStatic(copy); // `.mjs` extension required
         fs.removeSync(copy);
     },
     'esm-import-dynamic': async (mod) => {
-        const copy = `${os.tmpdir()}/copy.mjs`;
+        const copy = `${os.tmpdir()}/__copy.mjs`;
         fs.copySync(mod, copy);
         await testImportDynamic(copy); // `.mjs` extension required
         fs.removeSync(copy);
