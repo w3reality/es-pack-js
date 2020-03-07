@@ -1,51 +1,20 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
 // A webpack-based tool for building JavaScript module variants (MIT License)
 
+const path = require('path');
+const fs = require('fs-extra');
+const toml = require('toml');
+
 const { version } = require('../package.json');
 console.log(`es-pack ${version}`);
 
-let __debugLevel = 0; // 0: production
-const __log = (...args) => {
-    if (__debugLevel > 0) console.log(...args);
-};
+const { Ret, Logger } = require('./utils');
 
-const path = require('path');
-const fs = require('fs-extra');
-const webpack = require('webpack');
-const TerserPlugin = require('terser-webpack-plugin');
-const Var2EsmPlugin = require('webpack-var2esm-plugin');
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const __logger = new Logger();
+const __log = __logger.createFn();
 
-const toml = require('toml');
-const { exec } = require('child_process');
-
-
-class Ret {
-    constructor(stdout, stderr) {
-        this.stdout = stdout || '';
-        this.stderr = stderr || '';
-        this.error = undefined;
-    }
-    apiResult() {
-        const { stdout, stderr } = this;
-        const success = this.error ? false : true;
-        return { stdout, stderr, success };
-    }
-    out(str, mute=false) {
-        if (!mute) console.log(str);
-        this.stdout += `${str}\n`;
-    }
-    err(str, mute=false) {
-        if (!mute) console.log(str);
-        this.stderr += `${str}\n`;
-    }
-    log(ret) {
-        const { stdout, stderr, error } = ret;
-        if (stdout) { this.stdout += stdout; }
-        if (stderr) { this.stderr += stderr; }
-        if (error) { this.error = error; }
-    }
-}
+const BundleTask = require('./task-bundle');
+const VerifyTask = require('./task-verify');
 
 class EsPack {
     constructor(params={}) {
@@ -57,7 +26,7 @@ class EsPack {
 
         const _argv = yargs ? EsPack.processYargs(yargs) : argv;
         if (_argv.debug) {
-            __debugLevel = 1;
+            __logger.setLevel(1);
         }
         __log('@@ _argv:', _argv);
 
@@ -188,106 +157,6 @@ class EsPack {
             .argv;
     }
 
-    static _createWpConfig(wpSeed) {
-        const modType = wpSeed.modtype || 'umd';
-        const libName = wpSeed.libname || 'my-mod'; // or pkg.name
-        const libObjName = wpSeed.libobjname || 'MyMod'; // name for script tag loading
-        const outDir = wpSeed.outdir;
-        const baseDir = wpSeed.basedir;
-
-        const plugins = [];
-
-        if (wpSeed.ba) {
-            plugins.push(new BundleAnalyzerPlugin());
-        }
-
-        const isDev = modType === 'dev';
-        let outputFile, minimize, target;
-        if (modType === 'umd' || isDev) {
-            minimize = !isDev;
-            outputFile = `${libName}${isDev ? '.js' : '.min.js'}`;
-            target = 'umd';
-        } else if (modType === 'esm' || modType === 'esm-compat') {
-            const isCompat = modType.endsWith('-compat');
-            minimize = true;
-            outputFile = libName + (isCompat ? '.esm.compat.js' : '.esm.js');
-            target = 'var';
-            plugins.push(new Var2EsmPlugin(libObjName, outputFile, isCompat));
-        } else {
-            console.error('invalid modtype:', modType);
-            throw 'exiting...';
-        }
-
-        return {
-            plugins,
-            watch: isDev,
-            mode: isDev ? 'development' : 'production',
-            entry: path.resolve(`${baseDir}/src/index.js`),
-            externals: { // https://webpack.js.org/configuration/externals/
-            },
-            output: {
-                path: path.resolve(outDir),
-                filename: outputFile,
-                library: libObjName,
-                libraryTarget: target,
-                libraryExport: 'default', // https://github.com/webpack/webpack/commit/de8fc51a6fe2aff3ea3a1c24d34d429897c3b694
-                umdNamedDefine: false, // must be 'false' for m to be resolved in require([''], (m) => {});
-                globalObject: 'typeof self !== \'undefined\' ? self : this' // https://github.com/webpack/webpack/issues/6522 - Can't create UMD build which can be required by Node
-            },
-            optimization: {
-                minimize: minimize,
-                minimizer: [
-                    new TerserPlugin({
-                        terserOptions: {
-                            compress: {
-                                drop_console: true
-                            }
-                        }
-                    })
-                ]
-            },
-            module: {
-                rules: [
-                    {
-                        test: /(\.jsx|\.js)$/,
-                        loader: 'babel-loader',
-                        options: { // instead of .babelrc -- https://github.com/babel/babel-loader#usage
-                            presets: [['@babel/preset-env', {modules: false}]]
-                        },
-                        exclude: /(node_modules|bower_components)/
-                    },
-                    {
-                        test: /(\.jsx|\.js)$/,
-                        loader: 'eslint-loader',
-                        options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
-                            parser: 'babel-eslint'
-                        },
-                        exclude: /node_modules/
-                    }
-                ]
-            },
-            resolve: {
-                modules: [
-                    path.resolve(`${baseDir}/node_modules`),
-                    path.resolve(`${baseDir}/src`)
-                ],
-                extensions: ['.json', '.js']
-            }
-        };
-    }
-    static createWpConfig(wpSeed) {
-        const wpConfig = this._createWpConfig(wpSeed);
-
-        const ext = path.resolve(`${wpSeed.basedir}/es-pack.config.js`);
-        if (fs.existsSync(ext)) {
-            const cb = require(ext).onConfigCreated;
-            if (cb) cb(wpConfig);
-        }
-
-        __log('@@ wpConfig:', wpConfig);
-        return wpConfig;
-    }
-
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
@@ -312,9 +181,17 @@ class EsPack {
             delete seed['modarray'];
             // console.log('seed:', seed);
 
-            const wpConfig = EsPack.createWpConfig(seed);
+            const wpConfig = BundleTask.createWpConfig(seed);
+
+            const ext = path.resolve(`${seed.basedir}/es-pack.config.js`);
+            if (fs.existsSync(ext)) {
+                const cb = require(ext).onConfigCreated;
+                if (cb) cb(wpConfig);
+            }
+
+            __log('@@ wpConfig:', wpConfig);
             cache[modtype] = wpConfig;
-            tasks.push(['run-webpack', async () => EsPack.runWebpack(wpConfig, throwOnError)]);
+            tasks.push(['task-bundle', async () => (new BundleTask(wpConfig, throwOnError, __log)).run()]);
         }
 
         if (this.config.verify) {
@@ -322,8 +199,8 @@ class EsPack {
                 if (modtype === 'dev') continue;
 
                 const { path, filename } = wpConfig.output;
-                const foo = { modtype, path, filename };
-                tasks.push(['run-verify', async () => EsPack.runVerify(foo, throwOnError)]);
+                const veriConfig = { modtype, path, filename };
+                tasks.push(['task-verify', async () => (new VerifyTask(veriConfig, throwOnError, __log)).run()]);
             }
         }
 
@@ -338,15 +215,6 @@ class EsPack {
         // ]);
     }
 
-    static async runVerify(foo, throwOnError) {
-        const ret = new Ret();
-
-        __log('@@ foo:', foo);
-        ret.err(`foo is ${foo}`);
-
-        return ret;
-    }
-
     static async runTasks(tasks) {
         const ret = new Ret();
         for (let task of tasks) {
@@ -357,123 +225,6 @@ class EsPack {
             ret.err(`${title}: ✅ done`);
         }
         return ret.apiResult();
-    }
-
-    static async _runWebpack(wpConfig) {
-        return new Promise((res, rej) => {
-            webpack(wpConfig, (err, stats) => {
-                if (err) return rej(err);
-
-                // for (let pi of wpConfig.plugins) {
-                //     if (pi.constructor.name === 'BundleAnalyzerPlugin') {
-                //         console.log('pi:', pi);
-                //     }
-                // }
-
-                if (wpConfig.watch) {
-                    this.processWpStats(stats, console.log);
-                    console.log('👀');
-                } else {
-                    res(stats);
-                }
-            });
-        });
-    }
-    static async runWebpack(wpConfig, throwOnError) {
-        const ret = new Ret();
-
-        const { output } = wpConfig;
-        __log('@@ output.path:', output.path);
-        __log('@@ output.filename:', output.filename);
-
-        try {
-            const stats = await this._runWebpack(wpConfig);
-            this.processWpStats(stats, ret.err.bind(ret));
-        } catch (err) {
-            // console.error(err.stack || err);
-            ret.err(err.stack || err);
-            if (err.details) {
-                // console.error(err.details);
-                ret.err(err.details);
-            }
-        }
-
-        return ret;
-    }
-
-    static processWpStats(stats, print) {
-        // https://webpack.js.org/api/node/
-        // https://webpack.js.org/api/node/#statstojsonoptions
-        // https://webpack.js.org/configuration/stats/
-        const info = stats.toJson();
-
-        // console.log('hasErrors, hasWarnings:', stats.hasErrors(), stats.hasWarnings());
-
-        if (stats.hasWarnings()) {
-            this.processInfoMsgs(info.warnings, print);
-        }
-
-        if (stats.hasErrors()) {
-            this.processInfoMsgs(info.errors, print);
-
-            for (let asset of info.assets) {
-                const residue = `${info.outputPath}/${asset.name}`;
-                __log('@@ removing residue:', residue);
-
-                // nop when the file/dir does not exist - https://github.com/jprichardson/node-fs-extra/blob/master/docs/remove-sync.md
-                fs.removeSync(residue);
-            }
-        } else {
-            this.summarizeInfo(info, print);
-        }
-    }
-    static processInfoMsgs(msgs, print) {
-        for (let msg of msgs) {
-            msg.split('\n').forEach(line => print(line));
-        }
-    }
-    static summarizeInfo(info, print) {
-        const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');
-
-        // https://webpack.js.org/api/stats/
-        __log(`@@ Hash: ${info.hash}`);
-        __log(`@@ Version: webpack ${info.version}`);
-        __log(`@@ Time: ${info.time}ms`);
-
-        // console.log('!! Object.keys(info):', Object.keys(info));
-        // !! Object.keys(info): [
-        //   'errors',            'warnings',
-        //   'version',           'hash',
-        //   'time',              'builtAt',
-        //   'publicPath',        'outputPath',
-        //   'assetsByChunkName', 'assets',
-        //   'filteredAssets',    'entrypoints',
-        //   'namedChunkGroups',  'chunks',
-        //   'modules',           'filteredModules',
-        //   'logging',           'children'
-        // ]
-
-        // TODO get filtered module list as the 'standard' webpack output
-        // for (let mod of info.modules) {
-        //     print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
-        // }
-
-        print(`Time: ${info.time} ms | Output path: ${info.outputPath}`);
-        for (let asset of info.assets) {
-            print(`✨ ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
-        }
-    }
-
-    static _execCommand(command) {
-        return new Promise((res, rej) => {
-            exec(command, (error, stdout, stderr) => {
-                if (error !== null) {
-                    rej({ error, stdout, stderr });
-                } else {
-                    res({ stdout, stderr });
-                }
-            });
-        });
     }
 }
 

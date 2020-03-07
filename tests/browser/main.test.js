@@ -18,17 +18,18 @@ let server = null;
 let metaArgs = null;
 
 beforeAll(async () => {
-    if (1) {
+    if (0) {
         console.error('!! skipping build !!');
     } else {
         fs.removeSync(outDir);
         await buildTestModule({ outDir, modPath, libName, libobjName });
     }
 
-    server = await (new Server(outDir)).listen();
+    const serverDir = outDir;
+    server = await (new Server(serverDir)).listen();
     console.log('server.port:', server.port);
 
-    metaArgs = [libobjName, outDir, server.port];
+    metaArgs = [libobjName, serverDir, server.port];
 });
 
 afterAll(async () => {

@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.2.0-dev.2",
+    "version": "0.2.0-dev.3",
     "description": "A webpack-based tool for building JavaScript module variants",
     "bin": {
         "es-pack": "bin/es-pack"

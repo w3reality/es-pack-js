@@ -14,14 +14,17 @@ if (!modPath) throw new Error('MOD_PATH is required');
 switch (modType) {
     case 'umd':
         test('umd: require', () => units['umd-require'](modPath));
-        test('umd: static import', async () => await units['umd-import-static'](modUmd));
+        test('umd: static import', async () => await units['umd-import-static'](modPath));
+        test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath));
         break;
     case 'esm':
-        test('esm: static import', async () => await units['esm-import-static'](modEsm));
+        test('esm: static import', async () => await units['esm-import-static'](modPath));
+        test('esm: dynamic import', async () => await units['esm-import-dynamic'](modPath));
         break;
     case 'esm-compat':
         test('esm-compat: require', () => units['esm-compat-require'](modPath));
-        test('esm-compat: static import', async () => await units['esm-compat-import-static'](modEsmCompat));
+        test('esm-compat: static import', async () => await units['esm-compat-import-static'](modPath));
+        test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modPath));
         break;
     default:
         console.log('unsupported modType:', modType);

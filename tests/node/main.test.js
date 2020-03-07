@@ -22,8 +22,10 @@ beforeAll(async () => {
 test('umd: require', () => units['umd-require'](modUmd));
 test('umd: static import', async () => await units['umd-import-static'](modUmd));
 test('umd: dynamic import', async () => await units['umd-import-dynamic'](modUmd));
+
 test('esm: static import', async () => await units['esm-import-static'](modEsm));
 test('esm: dynamic import', async () => await units['esm-import-dynamic'](modEsm));
+
 test('esm-compat: require', () => units['esm-compat-require'](modEsmCompat));
 test('esm-compat: static import', async () => await units['esm-compat-import-static'](modEsmCompat));
 test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modEsmCompat));

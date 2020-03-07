@@ -1,6 +1,6 @@
 const os = require('os');
 const fs = require('fs-extra');
-const EsPack = require('../../src/index');
+const { _execCommand } = require('../../src/utils');
 
 const testImport = mode => async mod => {
     const indexPath = `${os.tmpdir()}/__index.mjs`;
@@ -32,7 +32,7 @@ const testImport = mode => async mod => {
 
     let hasErr = false;
     try {
-        const ret = await EsPack._execCommand(
+        const ret = await _execCommand(
             `node --experimental-modules ${indexPath}`);
         console.log('ret:', ret);
     } catch (e) {
