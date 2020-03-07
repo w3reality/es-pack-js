@@ -13,6 +13,7 @@ __BODY__
 </body>
 </html>
 `;
+
 const testTag = async (mod, libobjName, serveDir, port) => {
     console.log('mod:', mod);
     const copyFile = '__copy.min.js';
@@ -20,7 +21,8 @@ const testTag = async (mod, libobjName, serveDir, port) => {
     fs.copySync(mod, copyPath);
 
     const page = await browser.newPage();
-    const htmlFile = 'index-tag.html';
+
+    const htmlFile = '__index-tag.html';
     const htmlPath = `${serveDir}/${htmlFile}`;
     const html = htmlTemplate
         .replace('__TITLE__', 'script tag')
@@ -38,57 +40,55 @@ const testTag = async (mod, libobjName, serveDir, port) => {
     fs.removeSync(copyPath);
 };
 
-const testImport = mode => async (mod, libobjName, serveDir, port) => {
-    expect(1).toBe(100); return; // !!!!!!!!!!!!!
-    // begin TODO *****************************
+const testImport = mode => async (mod, _libobjName, serveDir, port) => {
+    console.log('mod:', mod);
+    const copyFile = '__copy.esm.js';
+    const copyPath = `${serveDir}/${copyFile}`;
+    fs.copySync(mod, copyPath);
+
+    const snippets = {
+        'static': `
+            import Mod from './${copyFile}';
+            window.Mod = Mod;
+        `,
+        'dynamic': `
+            (async () => {
+                const Mod = await import('./${copyFile}');
+                window.Mod = Mod;
+            })();
+        `,
+    };
 
     const page = await browser.newPage();
     page.on('console', obj => console.log(obj.text())); // https://stackoverflow.com/questions/46198527/puppeteer-log-inside-page-evaluate
 
+    const htmlFile = '__index-import.html';
+    const htmlPath = `${serveDir}/${htmlFile}`;
     const html = htmlTemplate
         .replace('__TITLE__', `${mode} import`)
-        .replace('__BODY__', `
-<script type="module">
-window.foo = 42;
+        .replace('__BODY__', `<script type="module">window.foo = 42; ${snippets[mode]}</script>`);
+    fs.writeFileSync(htmlPath, html);
 
-import Mod1 from './test-mod.esm.js';
-window.Mod1 = Mod1;
-
-(async () => {
-    const Mod2 = await import('./test-mod.esm.js');
-    window.Mod2 = Mod2;
-})();
-</script>
-        `);
-    fs.writeFileSync(`${outDir}/index-import.html`, html);
-
-    // NG per CORS
-    // await page.goto(`file:${pathRelTests('browser/target/index-import.html')}`);
-    //====
-    await page.goto(`http://localhost:${server.port}/target/index-import.html`);
+    // await page.goto(`file:${htmlPath}`); // NG per CORS
+    await page.goto(`http://localhost:${port}/${htmlFile}`);
 
     console.log('title:', await page.title());
 
-    let foo = await page.evaluate(() => window['foo']);
-    expect(foo).toBe(42);
-    // end TODO *****************************
+    expect(await page.evaluate(() => window['foo'])).toBe(42);
 
-    switch (mode) {
-        case 'static': {
-            const Mod = await page.evaluate(() => window['Mod1']);
-            console.log('static import - Mod:', Mod);
-            const ty = typeof Mod;
-            expect(ty === 'function' || ty === 'object').toBe(true);
-            break;
-        }
-        case 'dynamic': {
-            const Mod = await page.evaluate(() => window['Mod2']);
-            console.log('dynamic import - Mod:', Mod);
-            expect(Mod.hasOwnProperty('default')).toBe(true);
-            break;
-        }
-        default: throw `invalid mode: ${mode}`;
+    let Mod = await page.evaluate(() => window['Mod']);
+    console.log(`${mode} import - Mod:`, Mod);
+
+    if (mode === 'dynamic') {
+        expect(Mod.hasOwnProperty('default')).toBe(true);
+        Mod = Mod.default;
     }
+
+    const ty = typeof Mod;
+    expect(ty === 'function' || ty === 'object').toBe(true);
+
+    fs.removeSync(htmlPath);
+    fs.removeSync(copyPath);
 };
 
 const units = {
