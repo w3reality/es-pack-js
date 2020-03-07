@@ -185,8 +185,13 @@ class EsPack {
 
             const ext = path.resolve(`${seed.basedir}/es-pack.config.js`);
             if (fs.existsSync(ext)) {
+                __log('@@ found - ext:', ext)
                 const cb = require(ext).onConfigCreated;
-                if (cb) cb(wpConfig);
+                if (cb) {
+                    cb(wpConfig);
+                }
+            } else {
+                __log('@@ not found - ext:', ext)
             }
 
             __log('@@ wpConfig:', wpConfig);
