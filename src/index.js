@@ -130,7 +130,7 @@ class EsPack {
                         alias: 'ba',
                     },
                     'verify': {
-                        describe: 'WIP: Verify basic assumptions against built modules',
+                        describe: 'Verify basic assumptions against built modules',
                         boolean: true,
                         default: false,
                     },
