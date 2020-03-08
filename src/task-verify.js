@@ -6,20 +6,35 @@ const { Ret, execCommand } = require('./utils');
 class VerifyTask {
     constructor(config, throwOnError) {
         this.config = config;
-        this.throwOnError = throwOnError; // for `execCommand()`
+        this.throwOnError = throwOnError;
     }
 
     async run() {
-        const { config: veriConfig, throwOnError } = this;
-
+        const { config: vc, throwOnError } = this;
         const ret = new Ret();
 
-        __log('@@ veriConfig:', veriConfig);
-        __log('@@ throwOnError:', throwOnError);
-        ret.err(`veriConfig is ${veriConfig}`);
-        ret.log(await execCommand(`ls`, { throwOnError }));
+        __log('@@ vc:', vc);
+
+        ret.err(`testing module: ${vc.filename}`);
+        for (let mode of ['node', 'browser']) {
+            ret.log(await VerifyTask.runJest(vc, mode, throwOnError));
+        }
 
         return ret;
+    }
+    static async runJest(vc, mode, throwOnError) {
+        const espBase = path.join(__dirname, '..');
+        // console.log('espBase:', espBase);
+
+        const cmd = `MOD_TYPE=${vc.modtype} \
+            MOD_PATH=${vc.path}/${vc.filename} \
+            ${espBase}/jest \
+            -c ${espBase}/jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
+            ${espBase}/tests/${mode}/verify.test.js \
+            --silent false`;
+        // console.log('cmd:', cmd);
+
+        return await execCommand(cmd, { muteStdout: true, throwOnError });
     }
 }
 
