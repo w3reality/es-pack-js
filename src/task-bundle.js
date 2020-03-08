@@ -8,12 +8,9 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 const { Ret } = require('./utils');
 
-let __log = null;
 class BundleTask {
-    constructor(wpConfig, throwOnError, logFn=function(){}) {
-        __log = logFn;
+    constructor(wpConfig, throwOnError) {
         this.wpConfig = wpConfig;
-        this.throwOnError = throwOnError; // for `execCommand()`
     }
 
     async run() {

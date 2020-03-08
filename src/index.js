@@ -8,10 +8,10 @@ const toml = require('toml');
 const { version } = require('../package.json');
 console.log(`es-pack ${version}`);
 
-const { Ret, Logger } = require('./utils');
+const { Ret, Logger, _colors } = require('./utils');
 
-const __logger = new Logger();
-const __log = __logger.createFn();
+const logger = new Logger();
+global.__log = logger.createFn();
 
 const BundleTask = require('./task-bundle');
 const VerifyTask = require('./task-verify');
@@ -26,8 +26,9 @@ class EsPack {
 
         const _argv = yargs ? EsPack.processYargs(yargs) : argv;
         if (_argv.debug) {
-            __logger.setLevel(1);
+            logger.setLevel(1);
         }
+        __log(`${_colors.reverse}%s${_colors.reset}`, 'running in debug mode');
         __log('@@ _argv:', _argv);
 
         //
@@ -169,6 +170,7 @@ class EsPack {
             throw 'WIP: rustwasm';
         }
 
+        __log('@@ asApi:', asApi);
         const throwOnError = !asApi;
 
         // only the `build` command is supported for now

@@ -42,6 +42,34 @@ class Logger {
     }
 }
 
+const _colors = { // https://stackoverflow.com/questions/9781218/how-to-change-node-jss-console-font-color
+    reset: "\x1b[0m",
+    bright: "\x1b[1m",
+    dim: "\x1b[2m",
+    underscore: "\x1b[4m",
+    blink: "\x1b[5m",
+    reverse: "\x1b[7m",
+    hidden: "\x1b[8m",
+
+    fgBlack: "\x1b[30m",
+    fgRed: "\x1b[31m",
+    fgGreen: "\x1b[32m",
+    fgYellow: "\x1b[33m",
+    fgBlue: "\x1b[34m",
+    fgMagenta: "\x1b[35m",
+    fgCyan: "\x1b[36m",
+    fgWhite: "\x1b[37m",
+
+    bgBlack: "\x1b[40m",
+    bgRed: "\x1b[41m",
+    bgGreen: "\x1b[42m",
+    bgYellow: "\x1b[43m",
+    bgBlue: "\x1b[44m",
+    bgMagenta: "\x1b[45m",
+    bgCyan: "\x1b[46m",
+    bgWhite: "\x1b[47m",
+};
+
 const _execCommand = (command) => {
     return new Promise((res, rej) => {
         exec(command, (error, stdout, stderr) => {
@@ -63,7 +91,7 @@ const execCommand = async (command, opts={}) => {
     const actual = Object.assign({}, defaults, opts);
 
     try {
-        const ret = await this._execCommand(command);
+        const ret = await _execCommand(command);
         const { stdout, stderr } = ret;
         if (! actual.muteStdout && stdout) {
             __log(_colors.fgYellow, `begin stdout: --------`, _colors.reset);
@@ -87,4 +115,4 @@ const execCommand = async (command, opts={}) => {
 };
 
 
-module.exports = { Ret, Logger, _execCommand, execCommand };
+module.exports = { Ret, Logger, _colors, _execCommand, execCommand };
