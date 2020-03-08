@@ -26,8 +26,11 @@ class VerifyTask {
         const espBase = path.join(__dirname, '..');
         // console.log('espBase:', espBase);
 
-        const cmd = `MOD_TYPE=${vc.modtype} \
-            MOD_PATH=${vc.path}/${vc.filename} \
+        const cmd = `
+            MOD_TYPE=${vc.modtype} \
+            MOD_DIR=${vc.path} \
+            MOD_NAME=${vc.filename} \
+            MOD_LIBOBJ_NAME=${vc.libobjname} \
             ${espBase}/jest \
             -c ${espBase}/jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
             ${espBase}/tests/${mode}/verify.test.js \

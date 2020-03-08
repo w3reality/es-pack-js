@@ -205,8 +205,8 @@ class EsPack {
             for (let [modtype, wpConfig] of Object.entries(cache)) {
                 if (modtype === 'dev') continue;
 
-                const { path, filename } = wpConfig.output;
-                const veriConfig = { modtype, path, filename };
+                const { path, filename, library: libobjname } = wpConfig.output;
+                const veriConfig = { modtype, path, filename, libobjname };
                 tasks.push(['task-verify', async () => (new VerifyTask(veriConfig, throwOnError, __log)).run()]);
             }
         }

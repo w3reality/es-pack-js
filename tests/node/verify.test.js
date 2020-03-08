@@ -4,12 +4,8 @@ const { units } = require('./units');
 // $ MOD_TYPE=esm MOD_PATH=${PWD}/tests/node/target/test-mod.esm.js  ./jest tests/node/verify.test.js --silent false
 // $ MOD_TYPE=esm-compat MOD_PATH=${PWD}/tests/node/target/test-mod.esm.compat.js  ./jest tests/node/verify.test.js --silent false
 
-const modType = process.env.MOD_TYPE;
-const modPath = process.env.MOD_PATH;
-console.log('modType:', modType);
-console.log('modPath:', modPath);
-if (!modType) throw new Error('MOD_TYPE is required');
-if (!modPath) throw new Error('MOD_PATH is required');
+const { MOD_TYPE: modType, MOD_DIR: modDir, MOD_NAME: modName } = process.env;
+const modPath = `${modDir}/${modName}`;
 
 switch (modType) {
     case 'umd':
