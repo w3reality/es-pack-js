@@ -26,12 +26,18 @@ class VerifyTask {
         const espBase = path.join(__dirname, '..');
         // console.log('espBase:', espBase);
 
+        let jest = `${espBase}/../.bin/jest`; // local install case
+        if (!fs.existsSync(jest)) {
+            // global install case
+            jest = `${espBase}/node_modules/.bin/jest`;
+        }
+
         const cmd = `
             MOD_TYPE=${vc.modtype} \
             MOD_DIR=${vc.path} \
             MOD_NAME=${vc.filename} \
             MOD_LIBOBJ_NAME=${vc.libobjname} \
-            ${espBase}/jest \
+            ${jest} \
             -c ${espBase}/jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
             ${espBase}/tests/${mode}/verify.test.js \
             --silent false`;
