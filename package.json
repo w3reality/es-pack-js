@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.2.0-rc.2",
+    "version": "0.2.0-rc.3",
     "description": "A webpack-based tool for building JavaScript module variants",
     "bin": {
         "es-pack": "bin/es-pack"
@@ -8,10 +8,11 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "test": "npm run test:node && npm run test:browser",
+        "test": "npm run test:node && npm run test:browser && npm run test:verify",
         "test:node": "jest tests/node/main.test.js",
-        "test:node:sf": "jest tests/node/main.test.js --silent false",
-        "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js"
+        "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
+        "test:verify": "bin/es-pack build examples/test -m umd esm esm-compat --verify",
+        "test:node:sf": "jest tests/node/main.test.js --silent false"
     },
     "repository": {
         "type": "git",

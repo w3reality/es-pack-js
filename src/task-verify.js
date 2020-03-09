@@ -28,18 +28,17 @@ class VerifyTask {
 
         let jest = `${espBase}/../.bin/jest`; // local install case
         if (!fs.existsSync(jest)) {
-            // global install case
-            jest = `${espBase}/node_modules/.bin/jest`;
+            jest = `${espBase}/node_modules/.bin/jest`; // global/repo install case
         }
 
-        const cmd = `
+        const cmd = `cd ${espBase} &&
             MOD_TYPE=${vc.modtype} \
             MOD_DIR=${vc.path} \
             MOD_NAME=${vc.filename} \
             MOD_LIBOBJ_NAME=${vc.libobjname} \
             ${jest} \
-            -c ${espBase}/jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
-            ${espBase}/tests/${mode}/verify.test.js \
+            -c jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
+            tests/${mode}/verify.test.js \
             --silent false`;
         // console.log('cmd:', cmd);
 
