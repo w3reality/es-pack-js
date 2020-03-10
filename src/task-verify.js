@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
+const os = require('os');
 
 const { Ret, execCommand } = require('./utils');
 
@@ -26,19 +27,30 @@ class VerifyTask {
         const espBase = path.join(__dirname, '..');
         // console.log('espBase:', espBase);
 
-        let jest = `${espBase}/../.bin/jest`; // local install case
-        if (!fs.existsSync(jest)) {
-            jest = `${espBase}/node_modules/.bin/jest`; // global/repo install case
+        let nodeModulesPath = `${espBase}/node_modules`; // global/repo install case
+        if (!fs.existsSync(nodeModulesPath)) {
+            nodeModulesPath = `${espBase}/..`; // local install case
         }
+        const jestBinPath = `${nodeModulesPath}/.bin/jest`;
 
-        const cmd = `cd ${espBase} &&
+        // Use the tmp dir to work around Jest's ignoring config/test paths
+        // with `/node_modules/`
+        const espBaseTmp = `${os.tmpdir()}/es-pack-sparse-verify`;
+        // console.log('espBaseTmp:', espBaseTmp);
+        fs.removeSync(espBaseTmp);
+        fs.emptyDirSync(espBaseTmp);
+        const _cpToDir = (srcDir, srcEntry, dstDir) => fs.copySync(`${srcDir}/${srcEntry}`, `${dstDir}/${srcEntry}`);
+        ['jest.config.js', 'jest.config.browser.js', 'package.json', 'src', 'tests'].forEach(ent => _cpToDir(espBase, ent, espBaseTmp));
+
+        const cmd = `
+            NODE_PATH=${nodeModulesPath} \
             MOD_TYPE=${vc.modtype} \
             MOD_DIR=${vc.path} \
             MOD_NAME=${vc.filename} \
             MOD_LIBOBJ_NAME=${vc.libobjname} \
-            ${jest} \
-            -c jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
-            tests/${mode}/verify.test.js \
+            ${jestBinPath} \
+            -c ${espBaseTmp}/jest.config.${mode === 'node' ? 'js' : 'browser.js'} \
+            ${espBaseTmp}/tests/${mode}/verify.test.js \
             --silent false`;
         // console.log('cmd:', cmd);
 
