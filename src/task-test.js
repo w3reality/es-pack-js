@@ -1,7 +1,3 @@
-const path = require('path');
-const fs = require('fs-extra');
-const os = require('os');
-
 const { Ret, execCommand } = require('./utils');
 
 class TestTask {
@@ -13,6 +9,8 @@ class TestTask {
     async run() {
         const { config: tc, throwOnError } = this;
         const ret = new Ret();
+
+        __log('@@ tc:', tc);
 
         for (let mode of ['node', 'browser']) {
             if (!tc[mode]) continue;

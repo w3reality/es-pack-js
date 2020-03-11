@@ -1,3 +1,7 @@
+const path = require('path');
+const fs = require('fs-extra');
+const os = require('os');
+
 const { exec } = require('child_process');
 
 // output handling for both commandline and api use cases
@@ -114,5 +118,37 @@ const execCommand = async (command, opts={}) => {
     }
 };
 
+const setupLocalJest = (mode, postfix) => {
+    const espBase = path.join(__dirname, '..');
+    // console.log('espBase:', espBase);
 
-module.exports = { Ret, Logger, _colors, _execCommand, execCommand };
+    let nodeModulesPath = `${espBase}/node_modules`; // global/repo install case
+    if (!fs.existsSync(nodeModulesPath)) {
+        nodeModulesPath = `${espBase}/..`; // local install case
+    }
+    const jestBinPath = `${nodeModulesPath}/.bin/jest`;
+
+    // Use the tmp dir to work around Jest's ignoring config/test paths
+    // with `/node_modules/`
+    const espBaseTmp = `${os.tmpdir()}/es-pack-sparse-${postfix}`;
+    // console.log('espBaseTmp:', espBaseTmp);
+    fs.removeSync(espBaseTmp);
+    fs.emptyDirSync(espBaseTmp);
+    const _cpToDir = (srcDir, srcEntry, dstDir) =>
+        fs.copySync(`${srcDir}/${srcEntry}`, `${dstDir}/${srcEntry}`);
+    ['jest.config.js', 'jest.config.browser.js', 'package.json', 'src', 'tests']
+        .forEach(ent => _cpToDir(espBase, ent, espBaseTmp));
+
+    const jestConfigPath =
+        `${espBaseTmp}/jest.config.${mode === 'node' ? 'js' : 'browser.js'}`;
+    const verifyScriptPath = `${espBaseTmp}/tests/${mode}/verify.test.js`;
+
+    return { nodeModulesPath, jestBinPath, jestConfigPath,
+        verifyScriptPath };
+};
+
+module.exports = {
+    Ret, Logger, _colors,
+    _execCommand, execCommand,
+    setupLocalJest,
+};
