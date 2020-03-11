@@ -33,39 +33,91 @@ class EsPack {
 
         //
 
+        const tasksAcc = [];
+
         const cmd = _argv._[0];
-        if (cmd !== 'build') {
-            console.error(`error: unsupported command: ${cmd}`);
-            return;
+        switch (cmd) {
+            case 'build': {
+                EsPack.pushBuildTasks(tasksAcc, EsPack.toBuildConfig(_argv));
+                break;
+            }
+            case 'test': {
+                // !!!!
+                break;
+            }
+            default: console.error(`error: unsupported command: ${cmd}`);
         }
-        __log('@@ cmd:', cmd);
 
-        //
+        __log('@@ tasksAcc:', tasksAcc);
+        this.tasks = tasksAcc;
+    }
 
+    static toBuildConfig(_argv) {
         const basedir = _argv._[1] || '.';
 
         let pkgName = 'no-pkg-name';
         try {
             pkgName = _argv.rustwasm ?
-                EsPack.resolveCrateName(basedir) :
-                EsPack.resolveNpmName(basedir);
+                this.resolveCrateName(basedir) :
+                this.resolveNpmName(basedir);
         } catch (err) {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
 
-        //
-
         const { ba, verify, rustwasm } = _argv;
-        this.config = {
+        const buildConfig = {
             basedir,
             modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
-            libobjname: _argv.libobjName || EsPack.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
+            libobjname: _argv.libobjName || this.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
             ba, verify, rustwasm,
         };
-        __log('@@ this.config:', this.config);
+        __log('@@ buildConfig:', buildConfig);
+        return buildConfig;
     }
+
+    static pushBuildTasks(tasksAcc, buildConfig) {
+        if (buildConfig.rustwasm) {
+            throw 'WIP: rustwasm';
+        }
+
+        const cache = {};
+
+        for (let modtype of buildConfig.modarray) {
+            const seed = Object.assign({}, buildConfig, { modtype });
+            delete seed['modarray'];
+            // console.log('seed:', seed);
+
+            const wpConfig = BundleTask.createWpConfig(seed);
+
+            const ext = path.resolve(`${seed.basedir}/es-pack.config.js`);
+            if (fs.existsSync(ext)) {
+                __log('@@ found - ext:', ext)
+                const cb = require(ext).onConfigCreated;
+                if (cb) {
+                    cb(wpConfig);
+                }
+            } else {
+                __log('@@ not found - ext:', ext)
+            }
+
+            __log('@@ wpConfig:', wpConfig);
+            cache[modtype] = wpConfig;
+            tasksAcc.push(['task-bundle', async (throwsOnErr) => (new BundleTask(wpConfig, throwsOnErr, __log)).run()]);
+        }
+
+        if (buildConfig.verify) {
+            for (let [modtype, wpConfig] of Object.entries(cache)) {
+                if (modtype === 'dev') continue;
+
+                const { path, filename, library: libobjname } = wpConfig.output;
+                const veriConfig = { modtype, path, filename, libobjname };
+                tasksAcc.push(['task-verify', async (throwsOnErr) => (new VerifyTask(veriConfig, throwsOnErr, __log)).run()]);
+            }
+        }
+    }
+
 
     static resolveNpmName(basedir) {
         return require(path.resolve(`${basedir}/package.json`)).name;
@@ -146,7 +198,7 @@ class EsPack {
                     },
                 })
             )
-            .command('test', 'WIP: Test modules', yargs => yargs
+            .command('test', 'Test modules', yargs => yargs
                 .usage('usage: $0 test [<test-dir-path>=./tests] [Options]')
                 .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
                 .alias('help', 'h')
@@ -161,73 +213,16 @@ class EsPack {
     async run() { return await this._run(false); }
     async runAsApi() { return await this._run(true); }
     async _run(asApi) {
-        if (!this.config) {
-            console.error('invalid config, bye');
-            return;
-        }
-
-        if (this.config.rustwasm) {
-            throw 'WIP: rustwasm';
-        }
-
-        __log('@@ asApi:', asApi);
-        const throwOnError = !asApi;
-
-        // only the `build` command is supported for now
-
-        const tasks = [];
-        const cache = {};
-
-        for (let modtype of this.config.modarray) {
-            const seed = Object.assign({}, this.config, { modtype });
-            delete seed['modarray'];
-            // console.log('seed:', seed);
-
-            const wpConfig = BundleTask.createWpConfig(seed);
-
-            const ext = path.resolve(`${seed.basedir}/es-pack.config.js`);
-            if (fs.existsSync(ext)) {
-                __log('@@ found - ext:', ext)
-                const cb = require(ext).onConfigCreated;
-                if (cb) {
-                    cb(wpConfig);
-                }
-            } else {
-                __log('@@ not found - ext:', ext)
-            }
-
-            __log('@@ wpConfig:', wpConfig);
-            cache[modtype] = wpConfig;
-            tasks.push(['task-bundle', async () => (new BundleTask(wpConfig, throwOnError, __log)).run()]);
-        }
-
-        if (this.config.verify) {
-            for (let [modtype, wpConfig] of Object.entries(cache)) {
-                if (modtype === 'dev') continue;
-
-                const { path, filename, library: libobjname } = wpConfig.output;
-                const veriConfig = { modtype, path, filename, libobjname };
-                tasks.push(['task-verify', async () => (new VerifyTask(veriConfig, throwOnError, __log)).run()]);
-            }
-        }
-
-        __log('@@ tasks:', tasks);
-
-        return await EsPack.runTasks(tasks);
-        //====
-        // return await EsPack.runTasks([
-        //     ['task-foo', async () => EsPack.runFoo(..., !asApi /* throwOnError */)],
-        //     ['task-bar', async () => EsPack.runBar(..., !asApi /* throwOnError */)],
-        //     //...
-        // ]);
+        __log('@@ _run(): asApi:', asApi);
+        return await EsPack.runTasks(this.tasks, !asApi);
     }
 
-    static async runTasks(tasks) {
+    static async runTasks(tasks, throwsOnErr=true) {
         const ret = new Ret();
         for (let task of tasks) {
             const [title, fn] = task;
             ret.err(`\n${title}: 🌀 spinning...`);
-            ret.log(await fn());
+            ret.log(await fn(throwsOnErr));
             if (ret.error) break;
             ret.err(`${title}: ✅ done`);
         }
