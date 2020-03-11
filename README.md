@@ -1,5 +1,5 @@
 ```
-es-pack 0.2.0-dev.0
+es-pack 0.2.1-dev.1
 usage: esp build [<path>=.] [Options]
 
 Options:
@@ -13,8 +13,9 @@ Options:
   --libobj-name            Set library object name (e.g. "FooBarJs")
   --bundle-analyzer, --ba  Enable `webpack-bundle-analyzer` plugin
                                                       [boolean] [default: false]
-  --rustwasm               Toggle `rustwasm` mode (WIP)
+  --verify                 Verify basic assumptions against built modules
                                                       [boolean] [default: false]
+  --rustwasm               WIP: Toggle `rustwasm` mode[boolean] [default: false]
   --debug                  Print debug log and keep intermediate output
                                                       [boolean] [default: false]
 ```

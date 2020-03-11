@@ -34,18 +34,19 @@ class EsPack {
         //
 
         const tasksAcc = [];
-
         const cmd = _argv._[0];
         switch (cmd) {
             case 'build': {
-                EsPack.pushBuildTasks(tasksAcc, EsPack.toBuildConfig(_argv));
+                EsPack.pushBuildTasks(tasksAcc,
+                    EsPack.toBuildConfig(_argv));
                 break;
             }
             case 'test': {
-                // !!!!
+                EsPack.pushTestTasks(tasksAcc,
+                    EsPack.toTestConfig(_argv));
                 break;
             }
-            default: console.error(`error: unsupported command: ${cmd}`);
+            default: console.error(`error: unsupported subcommand: ${cmd}`);
         }
 
         __log('@@ tasksAcc:', tasksAcc);
@@ -65,7 +66,7 @@ class EsPack {
         }
 
         const { ba, verify, rustwasm } = _argv;
-        const buildConfig = {
+        return {
             basedir,
             modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
@@ -73,11 +74,11 @@ class EsPack {
             outdir: _argv.outDir || `${basedir}/target`,
             ba, verify, rustwasm,
         };
-        __log('@@ buildConfig:', buildConfig);
-        return buildConfig;
     }
 
     static pushBuildTasks(tasksAcc, buildConfig) {
+        __log('@@ buildConfig:', buildConfig);
+
         if (buildConfig.rustwasm) {
             throw 'WIP: rustwasm';
         }
@@ -118,6 +119,16 @@ class EsPack {
         }
     }
 
+    static toTestConfig(_argv) {
+        return {
+            // TODO
+        };
+    }
+
+    static pushTestTasks(tasksAcc, testConfig) {
+        __log('@@ testConfig:', testConfig);
+        // TODO
+    }
 
     static resolveNpmName(basedir) {
         return require(path.resolve(`${basedir}/package.json`)).name;
@@ -199,11 +210,21 @@ class EsPack {
                 })
             )
             .command('test', 'Test modules', yargs => yargs
-                .usage('usage: $0 test [<test-dir-path>=./tests] [Options]')
+                .usage('usage: $0 test [<path>=./tests] [Options]')
                 .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
                 .alias('help', 'h')
                 .version(false)
                 .options({
+                    'node': {
+                        describe: 'Enable tests under the `node` preset',
+                        boolean: true,
+                        default: true,
+                    },
+                    'browser': {
+                        describe: 'Enable tests under the `browser` preset',
+                        boolean: true,
+                        default: false,
+                    },
                 })
             )
             .command('help', 'Show help')
