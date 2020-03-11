@@ -15,6 +15,7 @@ global.__log = logger.createFn();
 
 const BundleTask = require('./task-bundle');
 const VerifyTask = require('./task-verify');
+const TestTask = require('./task-test');
 
 class EsPack {
     constructor(params={}) {
@@ -120,14 +121,18 @@ class EsPack {
     }
 
     static toTestConfig(_argv) {
+        const basedir = _argv._[1] || './tests';
+
+        const { node, browser } = _argv;
         return {
-            // TODO
+            basedir,
+            node, browser,
         };
     }
 
     static pushTestTasks(tasksAcc, testConfig) {
         __log('@@ testConfig:', testConfig);
-        // TODO
+        tasksAcc.push(['task-test', async (throwsOnErr) => (new TestTask(testConfig, throwsOnErr, __log)).run()]);
     }
 
     static resolveNpmName(basedir) {
