@@ -121,7 +121,7 @@ class EsPack {
     }
 
     static toTestConfig(_argv) {
-        const basedir = _argv._[1] || './tests';
+        const basedir = _argv._[1] || '.';
 
         const { node, browser } = _argv;
         return {
@@ -215,7 +215,7 @@ class EsPack {
                 })
             )
             .command('test', 'Test modules', yargs => yargs
-                .usage('usage: $0 test [<path>=./tests] [Options]')
+                .usage('usage: $0 test [<path>=.] [Options]')
                 .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
                 .alias('help', 'h')
                 .version(false)

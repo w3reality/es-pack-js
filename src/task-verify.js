@@ -19,6 +19,7 @@ class VerifyTask {
 
         return ret;
     }
+
     static async runJest(vc, mode, throwOnError) {
         const { nodeModulesPath, jestBinPath, jestConfigPath,
             verifyScriptPath } = setupLocalJest(mode, 'VerifyTask');

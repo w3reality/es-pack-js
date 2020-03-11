@@ -1,4 +1,5 @@
-const { Ret, execCommand } = require('./utils');
+const path = require('path');
+const { Ret, execCommand, setupLocalJest } = require('./utils');
 
 class TestTask {
     constructor(config, throwOnError) {
@@ -15,15 +16,26 @@ class TestTask {
         for (let mode of ['node', 'browser']) {
             if (!tc[mode]) continue;
 
-            ret.err(`@@ running tests with preset: ${mode}`);
-            ret.log(await TestTask.runJest(tc, mode, throwOnError));
+            const rootDir = path.resolve(tc.basedir);
+            ret.err(`@@ preset: ${mode}`);
+            ret.err(`@@ rootDir: ${rootDir}`);
+            ret.log(await TestTask.runJest(rootDir, mode, throwOnError));
         }
 
         return ret;
     }
 
-    static async runJest(tc, mode, throwOnError) {
-        const cmd = `echo ${tc.basedir}/${mode} 1>&2`;
+    static async runJest(rootDir, mode, throwOnError) {
+        const { nodeModulesPath, jestBinPath, jestConfigPath } =
+            setupLocalJest(mode, 'TestTask');
+
+        // const cmd = `echo DEBUG -- rootDir: ${rootDir} mode: ${mode} 1>&2`;
+        const cmd = `
+            NODE_PATH=${nodeModulesPath} \
+            ${jestBinPath} -c ${jestConfigPath} \
+            --rootDir ${rootDir} \
+            --silent false`;
+
         return await execCommand(cmd, { muteStdout: true, throwOnError });
     }
 }
