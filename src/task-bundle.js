@@ -114,7 +114,7 @@ class BundleTask {
         //     print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
         // }
 
-        print(`Time: ${info.time} ms | Output path: ${info.outputPath}`);
+        print(`${new Date().toLocaleString('default')} (${info.time}ms) | output path: ${info.outputPath}`);
         for (let asset of info.assets) {
             print(`✨ ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
         }
