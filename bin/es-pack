@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-var path = require('path');
+const path = require('path');
 
-var Mod = require(path.join(__dirname, '../src/index'));
+const Mod = require(path.join(__dirname, '../src/index'));
 (new Mod({yargs: require('yargs')})).run();
+
