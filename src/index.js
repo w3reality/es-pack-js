@@ -124,6 +124,11 @@ class EsPack {
         const basedir = _argv._[1] || '.';
 
         const { node, browser } = _argv;
+        if (!node && !browser) {
+            console.error('Sorry, either `--node` or `--browser` is required for the `test` subcommand.');
+            process.exit(1);
+        }
+
         return {
             basedir,
             node, browser,
@@ -223,7 +228,7 @@ class EsPack {
                     'node': {
                         describe: 'Enable tests under the `node` preset',
                         boolean: true,
-                        default: true,
+                        default: false,
                     },
                     'browser': {
                         describe: 'Enable tests under the `browser` preset',

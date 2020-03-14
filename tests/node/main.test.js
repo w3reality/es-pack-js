@@ -64,10 +64,13 @@ test('exit_code: build noexist', async () => {
     expect(await exitCodeOf(`${esp} build ${modPath}_noexist`)).toBe('1');
 });
 test('exit_code: test', async () => {
-    // $ esp test examples/test
+    // $ esp test --node examples/test
     // PASS examples/test/tests/node/will-pass.test.js
-    expect(await exitCodeOf(`${esp} test ${modPath}`)).toBe('0');
+    expect(await exitCodeOf(`${esp} test --node ${modPath}`)).toBe('0');
 });
 test('exit_code: test noexist', async () => {
-    expect(await exitCodeOf(`${esp} test ${modPath}_noexist`)).toBe('1');
+    expect(await exitCodeOf(`${esp} test --node ${modPath}_noexist`)).toBe('1');
+});
+test('exit_code: test demand at least one preset', async () => {
+    expect(await exitCodeOf(`${esp} test ${modPath}`)).toBe('1');
 });
