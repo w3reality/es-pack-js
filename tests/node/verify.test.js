@@ -5,6 +5,12 @@ const { units } = require('./units');
 // $ MOD_TYPE=esm-compat MOD_PATH=${PWD}/tests/node/target/test-mod.esm.compat.js  ./jest tests/node/verify.test.js --silent false
 
 const { MOD_TYPE: modType, MOD_DIR: modDir, MOD_NAME: modName } = process.env;
+test('env_vals', () => {
+    expect(typeof modType).toBe('string');
+    expect(typeof modDir).toBe('string');
+    expect(typeof modName).toBe('string');
+});
+
 const modPath = `${modDir}/${modName}`;
 
 switch (modType) {
