@@ -106,7 +106,7 @@ class EsPack {
 
             __log('@@ wpConfig:', wpConfig);
             cache[modtype] = wpConfig;
-            tasksAcc.push(['task-bundle', async (throwsOnErr) => (new BundleTask(wpConfig, throwsOnErr, __log)).run()]);
+            tasksAcc.push(['task-bundle', async () => (new BundleTask(wpConfig, __log)).run()]);
         }
 
         if (buildConfig.verify) {
@@ -115,7 +115,7 @@ class EsPack {
 
                 const { path, filename, library: libobjname } = wpConfig.output;
                 const veriConfig = { modtype, path, filename, libobjname };
-                tasksAcc.push(['task-verify', async (throwsOnErr) => (new VerifyTask(veriConfig, throwsOnErr, __log)).run()]);
+                tasksAcc.push(['task-verify', async () => (new VerifyTask(veriConfig, __log)).run()]);
             }
         }
     }
@@ -132,7 +132,7 @@ class EsPack {
 
     static pushTestTasks(tasksAcc, testConfig) {
         __log('@@ testConfig:', testConfig);
-        tasksAcc.push(['task-test', async (throwsOnErr) => (new TestTask(testConfig, throwsOnErr, __log)).run()]);
+        tasksAcc.push(['task-test', async () => (new TestTask(testConfig, __log)).run()]);
     }
 
     static resolveNpmName(basedir) {
@@ -236,20 +236,40 @@ class EsPack {
             .argv;
     }
 
-    async run() { return await this._run(false); }
-    async runAsApi() { return await this._run(true); }
-    async _run(asApi) {
-        __log('@@ _run(): asApi:', asApi);
-        return await EsPack.runTasks(this.tasks, !asApi);
+    async runAsApi() {
+        return await this._run();
+    }
+    async run() {
+        const apiResult = await this._run();
+        // console.log('!!!! apiResult:', apiResult, '<-- apiResult !!!!');
+
+        if (apiResult.isSuccess) {
+            process.exit(0);
+        } else {
+            const { error, errorInfo } = apiResult;
+            if (errorInfo) {
+                const { error, formatted } = errorInfo;
+                console.log(formatted || error.toString());
+            } else {
+                console.log(error.toString());
+            }
+            process.exit(1);
+        }
+    }
+    async _run() {
+        return await EsPack.runTasks(this.tasks);
     }
 
-    static async runTasks(tasks, throwsOnErr=true) {
+    static async runTasks(tasks) {
         const ret = new Ret();
         for (let task of tasks) {
             const [title, fn] = task;
             ret.err(`\n${title}: 🌀 spinning...`);
-            ret.log(await fn(throwsOnErr));
-            if (ret.error) break;
+            ret.log(await fn());
+            if (ret.error) {
+                ret.err(`${title}: ❌ error`);
+                break;
+            }
             ret.err(`${title}: ✅ done`);
         }
         return ret.apiResult();

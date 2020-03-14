@@ -10,11 +10,12 @@ class Ret {
         this.stdout = stdout || '';
         this.stderr = stderr || '';
         this.error = undefined;
+        this.errorInfo = undefined;
     }
     apiResult() {
-        const { stdout, stderr } = this;
-        const success = this.error ? false : true;
-        return { stdout, stderr, success };
+        const { stdout, stderr, error, errorInfo } = this;
+        const isSuccess = error ? false : true;
+        return { stdout, stderr, error, errorInfo, isSuccess };
     }
     out(str, mute=false) {
         if (!mute) console.log(str);
@@ -24,11 +25,19 @@ class Ret {
         if (!mute) console.log(str);
         this.stderr += `${str}\n`;
     }
-    log(ret) {
-        const { stdout, stderr, error } = ret;
+    setErrorInfo(error, formatted=error.toString()) {
+        this.error = error;
+        this.errorInfo = { error, formatted };
+        return error;
+    }
+    log(retOrRawRet) {
+        const { stdout, stderr, error, errorInfo } = retOrRawRet;
         if (stdout) { this.stdout += stdout; }
         if (stderr) { this.stderr += stderr; }
-        if (error) { this.error = error; }
+        if (error) {
+            this.error = error;
+            this.errorInfo = errorInfo;
+        }
     }
 }
 
@@ -74,29 +83,30 @@ const _colors = { // https://stackoverflow.com/questions/9781218/how-to-change-n
     bgWhite: "\x1b[47m",
 };
 
+// async-return a `rawRet`
 const _execCommand = (command) => {
     return new Promise((res, rej) => {
         exec(command, (error, stdout, stderr) => {
             if (error !== null) {
-                rej({ error, stdout, stderr });
+                rej({ error, stdout, stderr }); // `rawRet`
             } else {
-                res({ stdout, stderr });
+                res({ stdout, stderr }); // `rawRet`
             }
         });
     });
 };
 
+// async-return a `rawRet`
 const execCommand = async (command, opts={}) => {
     const defaults = {
         muteStdout: false,
         muteStderr: false,
-        throwOnError: true,
+        throwsOnErr: false,
     };
     const actual = Object.assign({}, defaults, opts);
 
-    try {
-        const ret = await _execCommand(command);
-        const { stdout, stderr } = ret;
+    const _print = rawRet => {
+        const { stdout, stderr } = rawRet;
         if (! actual.muteStdout && stdout) {
             __log(_colors.fgYellow, `begin stdout: --------`, _colors.reset);
             console.log(stdout);
@@ -107,15 +117,24 @@ const execCommand = async (command, opts={}) => {
             console.log(stderr);
             __log(_colors.fgCyan, `end stderr: --------`, _colors.reset);
         }
-        return ret;
-    } catch (ret) {
-        // console.log(_colors.fgRed, 'exec error: --------\n', ret.error, _colors.reset);
-        if (actual.throwOnError) {
-            throw ret.error;
+        return rawRet;
+    };
+
+    try {
+        return _print(await _execCommand(command));
+    } catch (rawRet) {
+        // console.log(_colors.fgRed, 'exec error: --------\n', rawRet.error, _colors.reset);
+        if (actual.throwsOnErr) {
+            throw rawRet.error;
         } else {
-            return ret;
+            return _print(rawRet);
         }
     }
+};
+
+const exitCodeOf = async cmd => {
+    const _cmd = `${cmd} > /dev/null && echo $? || echo $?`;
+    return (await _execCommand(_cmd)).stdout.trim();
 };
 
 const setupLocalJest = (mode, postfix) => {
@@ -147,8 +166,13 @@ const setupLocalJest = (mode, postfix) => {
         verifyScriptPath };
 };
 
+const formatErrorJest = rawRet => {
+    const { error, stdout } = rawRet;
+    return `\n${error.toString()}\n${stdout.trim()}`;
+};
+
 module.exports = {
     Ret, Logger, _colors,
-    _execCommand, execCommand,
-    setupLocalJest,
+    _execCommand, execCommand, exitCodeOf,
+    setupLocalJest, formatErrorJest,
 };

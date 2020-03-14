@@ -9,13 +9,12 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { Ret } = require('./utils');
 
 class BundleTask {
-    constructor(wpConfig, throwOnError) {
+    constructor(wpConfig) {
         this.wpConfig = wpConfig;
     }
 
     async run() {
         const { wpConfig } = this;
-
         const ret = new Ret();
 
         const { output } = wpConfig;
@@ -23,23 +22,18 @@ class BundleTask {
         __log('@@ output.filename:', output.filename);
 
         try {
-            const stats = await BundleTask._run(wpConfig);
-            BundleTask.processWpStats(stats, ret.err.bind(ret));
-        } catch (err) {
-            // console.error(err.stack || err);
-            ret.err(err.stack || err);
-            if (err.details) {
-                // console.error(err.details);
-                ret.err(err.details);
-            }
-        }
+            await BundleTask._run(wpConfig, ret);
+        } catch (_) { /* nop */ }
 
         return ret;
     }
-    static async _run(wpConfig) {
+
+    static async _run(wpConfig, ret) {
         return new Promise((res, rej) => {
             webpack(wpConfig, (err, stats) => {
-                if (err) return rej(err);
+                // return rej(ret.setErrorInfo(new Error('debug error...')));
+                //----
+                if (err) return rej(ret.setErrorInfo(err));
 
                 // for (let pi of wpConfig.plugins) {
                 //     if (pi.constructor.name === 'BundleAnalyzerPlugin') {
@@ -48,16 +42,24 @@ class BundleTask {
                 // }
 
                 if (wpConfig.watch) {
-                    this.processWpStats(stats, console.log);
-                    console.log('👀');
+                    const _errors = this.processWpStats(stats, console.log);
+                    console.log('\n👀');
+                    // no res/rej; enter looping
                 } else {
-                    res(stats);
+                    const print = ret.err.bind(ret);
+                    const printMute = str => print(str, true);
+                    const errors = this.processWpStats(stats, print, printMute);
+                    if (errors) {
+                        rej(ret.setErrorInfo(errors, `\n${errors.join()}`));
+                    } else {
+                        res();
+                    }
                 }
             });
         });
     }
 
-    static processWpStats(stats, print) {
+    static processWpStats(stats, print, printMute=undefined) {
         // https://webpack.js.org/api/node/
         // https://webpack.js.org/api/node/#statstojsonoptions
         // https://webpack.js.org/configuration/stats/
@@ -69,8 +71,11 @@ class BundleTask {
             this.processInfoMsgs(info.warnings, print);
         }
 
+        let errors = undefined;
         if (stats.hasErrors()) {
-            this.processInfoMsgs(info.errors, print);
+            errors = info.errors;
+
+            this.processInfoMsgs(errors, printMute || print);
 
             for (let asset of info.assets) {
                 const residue = `${info.outputPath}/${asset.name}`;
@@ -82,11 +87,15 @@ class BundleTask {
         } else {
             this.summarizeInfo(info, print);
         }
+
+        return errors;
     }
     static processInfoMsgs(msgs, print) {
-        for (let msg of msgs) {
-            msg.split('\n').forEach(line => print(line));
-        }
+        print(msgs.join('')); // suffice to do this ??
+        //====
+        // for (let msg of msgs) {
+        //     msg.split('\n').forEach(line => print(line));
+        // }
     }
     static summarizeInfo(info, print) {
         const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');

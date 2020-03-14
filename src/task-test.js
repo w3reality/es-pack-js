@@ -1,14 +1,14 @@
 const path = require('path');
-const { Ret, execCommand, setupLocalJest } = require('./utils');
+const { Ret, execCommand,
+    setupLocalJest, formatErrorJest } = require('./utils');
 
 class TestTask {
-    constructor(config, throwOnError) {
+    constructor(config) {
         this.config = config;
-        this.throwOnError = throwOnError;
     }
 
     async run() {
-        const { config: tc, throwOnError } = this;
+        const { config: tc } = this;
         const ret = new Ret();
 
         __log('@@ tc:', tc);
@@ -19,13 +19,22 @@ class TestTask {
             const rootDir = path.resolve(tc.basedir);
             ret.err(`@@ preset: ${mode}`);
             ret.err(`@@ rootDir: ${rootDir}`);
-            ret.log(await TestTask.runJest(rootDir, mode, throwOnError));
+
+            const rawRet = await TestTask.runJest(rootDir, mode);
+            // console.log('rawRet:', rawRet, '<-- rawRet');
+
+            ret.log(rawRet);
+            if (rawRet.error) {
+                ret.setErrorInfo(rawRet.error, formatErrorJest(rawRet));
+                // console.log('ret:', ret, '<-- ret; and breaking!!');
+                break;
+            }
         }
 
         return ret;
     }
 
-    static async runJest(rootDir, mode, throwOnError) {
+    static async runJest(rootDir, mode) {
         const { nodeModulesPath, jestBinPath, jestConfigPath } =
             setupLocalJest(mode, 'TestTask');
 
@@ -36,7 +45,7 @@ class TestTask {
             --rootDir ${rootDir} \
             --silent false`;
 
-        return await execCommand(cmd, { muteStdout: true, throwOnError });
+        return await execCommand(cmd, { muteStdout: true });
     }
 }
 

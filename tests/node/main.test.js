@@ -13,7 +13,7 @@ const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
 beforeAll(async () => {
-    if (0) return console.error('!! skipping build !!');
+    if (0) { return console.error('!! skipping build !!'); }
 
     fs.removeSync(outDir);
     await buildTestModule({ outDir, modPath, libName, libobjName });
@@ -30,7 +30,7 @@ test('esm-compat: require', () => units['esm-compat-require'](modEsmCompat));
 test('esm-compat: static import', async () => await units['esm-compat-import-static'](modEsmCompat));
 test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modEsmCompat));
 
-test('umd: functionality (specific to TestMod)', () => {
+test('functionality: umd TestMod', () => {
     const Mod = require(`${outDir}/test-mod.min`); // Mod: { Foo: [Function: e], Bar: [Function: e] }
     console.log('Mod:', Mod);
 
@@ -46,4 +46,28 @@ test('umd: functionality (specific to TestMod)', () => {
 
     const bar = new Bar();
     expect(bar.num).toBe(42);
+});
+
+
+const { exitCodeOf } = require('../../src/utils');
+const esp = pathRelTests('../bin/es-pack');
+
+test('exit_code: bare', async () => {
+    // expect(await exitCodeOf('ls')).toBe('0'); // debug
+    // expect(await exitCodeOf('ls --noexist')).toBe('1'); // debug
+    expect(await exitCodeOf(`${esp}`)).toBe('1');
+});
+test('exit_code: build', async () => {
+    expect(await exitCodeOf(`${esp} build ${modPath}`)).toBe('0');
+});
+test('exit_code: build noexist', async () => {
+    expect(await exitCodeOf(`${esp} build ${modPath}_noexist`)).toBe('1');
+});
+test('exit_code: test', async () => {
+    // $ esp test examples/test
+    // PASS examples/test/tests/node/will-pass.test.js
+    expect(await exitCodeOf(`${esp} test ${modPath}`)).toBe('0');
+});
+test('exit_code: test noexist', async () => {
+    expect(await exitCodeOf(`${esp} test ${modPath}_noexist`)).toBe('1');
 });

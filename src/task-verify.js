@@ -1,26 +1,32 @@
-const { Ret, execCommand, setupLocalJest } = require('./utils');
+const { Ret, execCommand,
+    setupLocalJest, formatErrorJest } = require('./utils');
 
 class VerifyTask {
-    constructor(config, throwOnError) {
+    constructor(config) {
         this.config = config;
-        this.throwOnError = throwOnError;
     }
 
     async run() {
-        const { config: vc, throwOnError } = this;
+        const { config: vc } = this;
         const ret = new Ret();
 
         __log('@@ vc:', vc);
 
-        ret.err(`testing module: ${vc.filename}`);
+        ret.err(`verifying module: ${vc.filename}`);
         for (let mode of ['node', 'browser']) {
-            ret.log(await VerifyTask.runJest(vc, mode, throwOnError));
+            const rawRet = await VerifyTask.runJest(vc, mode);
+
+            ret.log(rawRet);
+            if (rawRet.error) {
+                ret.setErrorInfo(rawRet.error, formatErrorJest(rawRet));
+                break;
+            }
         }
 
         return ret;
     }
 
-    static async runJest(vc, mode, throwOnError) {
+    static async runJest(vc, mode) {
         const { nodeModulesPath, jestBinPath, jestConfigPath,
             verifyScriptPath } = setupLocalJest(mode, 'VerifyTask');
         const cmd = `
@@ -33,7 +39,7 @@ class VerifyTask {
             --silent false`;
         // console.log('cmd:', cmd);
 
-        return await execCommand(cmd, { muteStdout: true, throwOnError });
+        return await execCommand(cmd, { muteStdout: true });
     }
 }
 

@@ -18,9 +18,7 @@ let server = null;
 let metaArgs = null;
 
 beforeAll(async () => {
-    if (0) {
-        console.error('!! skipping build !!');
-    } else {
+    if (0) { console.error('!! skipping build !!'); } else {
         fs.removeSync(outDir);
         await buildTestModule({ outDir, modPath, libName, libobjName });
     }
