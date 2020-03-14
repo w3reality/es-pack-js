@@ -1,5 +1,5 @@
 // es-pack-js - https://github.com/w3reality/es-pack-js
-// A webpack-based tool for building JavaScript module variants (MIT License)
+// Build portable modules from JavaScript codebase (MIT License)
 
 const path = require('path');
 const fs = require('fs-extra');
