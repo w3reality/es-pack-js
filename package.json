@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.3.2-dev.0",
+    "version": "0.3.2-rc.0",
     "description": "Build portable modules from JavaScript codebase",
     "bin": {
         "es-pack": "bin/es-pack"
@@ -8,11 +8,11 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "test": "npm run test:node && npm run test:browser && npm run test:verify",
+        "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:examples",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
         "test:verify": "bin/es-pack build examples/test -m umd esm esm-compat --verify",
-        "test:node:sf": "jest tests/node/main.test.js --silent false"
+        "test:examples": "bin/es-pack test examples/test --node --browser"
     },
     "repository": {
         "type": "git",

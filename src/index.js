@@ -281,4 +281,7 @@ class EsPack {
     }
 }
 
+const Server = require('../tests/browser/server');
+Object.assign(EsPack, { version, Server })
+
 module.exports = EsPack;
