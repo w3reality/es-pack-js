@@ -1,21 +1,13 @@
 ```
-es-pack 0.2.1-dev.1
-usage: esp build [<path>=.] [Options]
+es-pack
+usage: es-pack [Options] <Command>
+
+Commands:
+  esp build  Build modules
+  esp test   Test modules
+  esp help   Show help
 
 Options:
-  --help, -h               Show help                                   [boolean]
-  --module, -m             Set output module type (`umd`, `esm`, `esm-compat`)
-                                                        [array] [default: "umd"]
-  --dev                    Toggle behavior as `webpack --mode development
-                           --watch`                   [boolean] [default: false]
-  --out-dir, -d            Set output directory (`<path>/target`, otherwise)
-  --lib-name               Set output module file name (e.g. "foo-bar-js")
-  --libobj-name            Set library object name (e.g. "FooBarJs")
-  --bundle-analyzer, --ba  Enable `webpack-bundle-analyzer` plugin
-                                                      [boolean] [default: false]
-  --verify                 Verify basic assumptions against built modules
-                                                      [boolean] [default: false]
-  --rustwasm               WIP: Toggle `rustwasm` mode[boolean] [default: false]
-  --debug                  Print debug log and keep intermediate output
-                                                      [boolean] [default: false]
+  --help     Show help                                                 [boolean]
+  --version  Show version number                                       [boolean]
 ```
