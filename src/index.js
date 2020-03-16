@@ -82,6 +82,7 @@ class EsPack {
 
         if (buildConfig.rustwasm) {
             throw 'WIP: rustwasm';
+            // gowasm, aswasm, ...
         }
 
         const cache = {};

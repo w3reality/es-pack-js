@@ -1,15 +1,12 @@
 const path = require('path');
-
 const esPackJs = path.join(__dirname, '../../../../src/index');
 const EsPack = require(esPackJs); // emulating `require('es-pack-js')`
 
 let server = null;
-
 beforeAll(async () => {
     const serveDir = __dirname;
     server = await (new EsPack.Server(serveDir)).listen();
 });
-
 afterAll(async () => {
     server.close();
     server = null;
