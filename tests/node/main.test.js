@@ -63,6 +63,9 @@ test('exit_code: build', async () => {
 test('exit_code: build noexist', async () => {
     expect(await exitCodeOf(`${esp} build ${modPath}_noexist`)).toBe('1');
 });
+test('exit_code: build WebpackOptionsValidationError', async () => {
+    expect(await exitCodeOf(`${esp} build ${pathRelTests('../examples/test-webpack')}`)).toBe('1');
+});
 test('exit_code: test', async () => {
     // $ esp test --node examples/test
     // PASS examples/test/tests/node/will-pass.test.js

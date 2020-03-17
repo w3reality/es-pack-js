@@ -30,32 +30,36 @@ class BundleTask {
 
     static async _run(wpConfig, ret) {
         return new Promise((res, rej) => {
-            webpack(wpConfig, (err, stats) => {
-                // return rej(ret.setErrorInfo(new Error('debug error...')));
-                //----
-                if (err) return rej(ret.setErrorInfo(err));
+            try {
+                webpack(wpConfig, (err, stats) => {
+                    // return rej(ret.setErrorInfo(new Error('debug error...')));
+                    //----
+                    if (err) return rej(ret.setErrorInfo(err));
 
-                // for (let pi of wpConfig.plugins) {
-                //     if (pi.constructor.name === 'BundleAnalyzerPlugin') {
-                //         console.log('pi:', pi);
-                //     }
-                // }
+                    // for (let pi of wpConfig.plugins) {
+                    //     if (pi.constructor.name === 'BundleAnalyzerPlugin') {
+                    //         console.log('pi:', pi);
+                    //     }
+                    // }
 
-                if (wpConfig.watch) {
-                    const _errors = this.processWpStats(stats, console.log);
-                    console.log('\n👀');
-                    // no res/rej; enter looping
-                } else {
-                    const print = ret.err.bind(ret);
-                    const printMute = str => print(str, true);
-                    const errors = this.processWpStats(stats, print, printMute);
-                    if (errors) {
-                        rej(ret.setErrorInfo(errors, `\n${errors.join()}`));
+                    if (wpConfig.watch) {
+                        const _errors = this.processWpStats(stats, console.log);
+                        console.log('\n👀');
+                        // no res/rej; enter looping
                     } else {
-                        res();
+                        const print = ret.err.bind(ret);
+                        const printMute = str => print(str, true);
+                        const errors = this.processWpStats(stats, print, printMute);
+                        if (errors) {
+                            rej(ret.setErrorInfo(errors, `\n${errors.join()}`));
+                        } else {
+                            res();
+                        }
                     }
-                }
-            });
+                });
+            } catch (ex) {
+                rej(ret.setErrorInfo(ex));
+            }
         });
     }
 
