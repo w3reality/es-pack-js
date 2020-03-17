@@ -1,6 +1,5 @@
 module.exports = {
-    onVerifyNode: () => {
-    },
-    onVerifyBrowser: () => {
+    onWebpackConfigCreated: config => {
+        config['JustNotExist'] = 42; // `webpack()` should raise a `WebpackOptionsValidationError`
     },
 };
