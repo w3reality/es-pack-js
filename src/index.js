@@ -165,8 +165,10 @@ class EsPack {
 
     static processYargs(yargs) {
         return yargs
-            .usage('usage: $0 [Options] <Command>')
+            .usage('usage: $0 <Command> [Options]')
             .demandCommand(1, '') // https://github.com/yargs/yargs/issues/895
+            .alias('help', 'h')
+            .version(false)
             .command('build', 'Build modules', yargs => yargs
                 .usage('usage: $0 build [<path>=.] [Options]')
                 .demandCommand(0, 1) // .demandCommand([min=1], [minMsg]) https://github.com/yargs/yargs/blob/master/docs/api.md#demandcommandmin1-minmsg
