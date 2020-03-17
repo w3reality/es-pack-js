@@ -1,13 +1,12 @@
 ```
 es-pack
-usage: es-pack [Options] <Command>
+usage: es-pack <Command> [Options]
 
 Commands:
-  esp build  Build modules
-  esp test   Test modules
-  esp help   Show help
+  es-pack build  Build modules
+  es-pack test   Test modules
+  es-pack help   Show help
 
 Options:
-  --help     Show help                                                 [boolean]
-  --version  Show version number                                       [boolean]
+  --help, -h  Show help                                                [boolean]
 ```
