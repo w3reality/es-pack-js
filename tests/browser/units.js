@@ -33,8 +33,8 @@ const testTag = async (mod, libobjName, serveDir, port) => {
     await page.goto(`http://localhost:${port}/${htmlFile}`);
 
     console.log('title:', await page.title());
-    const ret = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
-    expect(ret).toBe('object');
+    const ty = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
+    expect(ty === 'function' || ty === 'object').toBe(true);
 
     fs.removeSync(htmlPath);
     fs.removeSync(copyPath);
