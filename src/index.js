@@ -94,6 +94,7 @@ class EsPack {
         }
 
         const cache = {};
+        const { extConfig } = buildConfig;
 
         for (let modtype of buildConfig.modarray) {
             const seed = Object.assign({}, buildConfig, { modtype });
@@ -101,10 +102,9 @@ class EsPack {
             // console.log('seed:', seed);
 
             const wpConfig = BundleTask.createWpConfig(seed);
-            if (buildConfig.extConfig) {
-                const cb = buildConfig.extConfig.onWebpackConfigCreated;
-                if (cb) cb(wpConfig);
-            }
+
+            const { onWebpackConfigCreated: cb } = extConfig || {};
+            if (cb) cb(wpConfig);
 
             __log('@@ wpConfig:', wpConfig);
             cache[modtype] = wpConfig;
@@ -115,8 +115,12 @@ class EsPack {
             for (let [modtype, wpConfig] of Object.entries(cache)) {
                 if (modtype === 'dev') continue;
 
+                const { onVerifyNode, onVerifyBrowser } = extConfig || {};
+
                 const { path, filename, library: libobjname } = wpConfig.output;
-                const veriConfig = { modtype, path, filename, libobjname };
+                const veriConfig = { modtype, path, filename, libobjname,
+                    onVerifyNode, onVerifyBrowser };
+
                 tasksAcc.push(['task-verify', async () => (new VerifyTask(veriConfig, __log)).run()]);
             }
         }
