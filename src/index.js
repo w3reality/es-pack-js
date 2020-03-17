@@ -54,8 +54,16 @@ class EsPack {
         this.tasks = tasksAcc;
     }
 
+    static getExtConfig(basedir) {
+        const extPath = path.resolve(`${basedir}/es-pack.config.js`);
+        const extConfig = fs.existsSync(extPath) ? require(extPath) : null;
+        __log(`@@ ${extConfig ? '' : 'NOT '}detected - ext: ${extPath}`);
+        return extConfig;
+    }
+
     static toBuildConfig(_argv) {
         const basedir = _argv._[1] || '.';
+        const extConfig = this.getExtConfig(basedir);
 
         let pkgName = 'no-pkg-name';
         try {
@@ -68,7 +76,7 @@ class EsPack {
 
         const { ba, verify, rustwasm } = _argv;
         return {
-            basedir,
+            basedir, extConfig,
             modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || this.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
@@ -93,16 +101,9 @@ class EsPack {
             // console.log('seed:', seed);
 
             const wpConfig = BundleTask.createWpConfig(seed);
-
-            const ext = path.resolve(`${seed.basedir}/es-pack.config.js`);
-            if (fs.existsSync(ext)) {
-                __log('@@ found - ext:', ext)
-                const cb = require(ext).onWebpackConfigCreated;
-                if (cb) {
-                    cb(wpConfig);
-                }
-            } else {
-                __log('@@ not found - ext:', ext)
+            if (buildConfig.extConfig) {
+                const cb = buildConfig.extConfig.onWebpackConfigCreated;
+                if (cb) cb(wpConfig);
             }
 
             __log('@@ wpConfig:', wpConfig);
@@ -123,6 +124,7 @@ class EsPack {
 
     static toTestConfig(_argv) {
         const basedir = _argv._[1] || '.';
+        const extConfig = this.getExtConfig(basedir);
 
         const { node, browser } = _argv;
         if (!node && !browser) {
@@ -131,13 +133,14 @@ class EsPack {
         }
 
         return {
-            basedir,
+            basedir, extConfig,
             node, browser,
         };
     }
 
     static pushTestTasks(tasksAcc, testConfig) {
         __log('@@ testConfig:', testConfig);
+
         tasksAcc.push(['task-test', async () => (new TestTask(testConfig, __log)).run()]);
     }
 
