@@ -11,8 +11,8 @@
         "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:examples",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
-        "test:verify": "bin/es-pack build examples/test -m umd esm esm-compat --verify",
-        "test:examples": "bin/es-pack test examples/test --node --browser"
+        "test:verify": "bin/es-pack build examples/base -m umd esm esm-compat --verify",
+        "test:examples": "bin/es-pack test examples/base --node --browser"
     },
     "repository": {
         "type": "git",

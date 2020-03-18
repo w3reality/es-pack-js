@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const { build: buildTestModule, pathRelTests } = require('../build');
 const { units } = require('./units');
 
-const modPath = pathRelTests('../examples/test');
+const modPath = pathRelTests('../examples/base');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
 
@@ -64,11 +64,13 @@ test('exit_code: build noexist', async () => {
     expect(await exitCodeOf(`${esp} build ${modPath}_noexist`)).toBe('1');
 });
 test('exit_code: build WebpackOptionsValidationError', async () => {
-    expect(await exitCodeOf(`${esp} build ${pathRelTests('../examples/test-webpack')}`)).toBe('1');
+    const examplePath = pathRelTests('../examples/webpack-exception');
+    expect(fs.existsSync(examplePath)).toBe(true);
+    expect(await exitCodeOf(`${esp} build ${examplePath}`)).toBe('1');
 });
 test('exit_code: test', async () => {
-    // $ esp test --node examples/test
-    // PASS examples/test/tests/node/will-pass.test.js
+    // $ esp test --node examples/base
+    // PASS examples/base/tests/node/will-pass.test.js
     expect(await exitCodeOf(`${esp} test --node ${modPath}`)).toBe('0');
 });
 test('exit_code: test noexist', async () => {

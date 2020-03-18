@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const { build: buildTestModule, pathRelTests } = require('../build');
 const { units } = require('./units');
 
-const modPath = pathRelTests('../examples/test');
+const modPath = pathRelTests('../examples/base');
 const libName = 'test-mod';
 const libobjName = 'TestMod';
 
