@@ -14,7 +14,22 @@ __BODY__
 </html>
 `;
 
-const testTag = async (mod, libobjName, serveDir, port) => {
+const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
+    // done -- $ esp build  --debug00 --verify -m umd
+    // TODO !!!! refactor and also for `testImport()`
+    // yet -- $ esp build  --debug00 --verify -m esm
+    // yet -- $ esp build  --debug00 --verify -m esm-compat
+
+    let preloadTag = '';
+    if (preloadJs) {
+        const copyFile = '__copy.preload.js';
+        const copyPath = `${serveDir}/${copyFile}`;
+        fs.copySync(preloadJs, copyPath);
+        preloadTag = `<script src='./${copyFile}'></script><!-- via: ${preloadJs} -->`;
+    }
+
+    // TODO remove copy !!!!!!! later
+
     console.log('mod:', mod);
     const copyFile = '__copy.min.js';
     const copyPath = `${serveDir}/${copyFile}`;
@@ -26,21 +41,23 @@ const testTag = async (mod, libobjName, serveDir, port) => {
     const htmlPath = `${serveDir}/${htmlFile}`;
     const html = htmlTemplate
         .replace('__TITLE__', 'script tag')
-        .replace('__BODY__', `<script src='./${copyFile}'></script>`);
+        // .replace('__BODY__', `<script src='./${copyFile}'></script>`);
+        .replace('__BODY__', `${preloadTag}\n<script src='./${copyFile}'></script>`);
     fs.writeFileSync(htmlPath, html);
 
     // await page.goto(`file:${htmlPath}`);
     await page.goto(`http://localhost:${port}/${htmlFile}`);
 
     console.log('title:', await page.title());
+
     const ty = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
     expect(ty === 'function' || ty === 'object').toBe(true);
 
-    fs.removeSync(htmlPath);
-    fs.removeSync(copyPath);
+    // fs.removeSync(htmlPath);
+    // fs.removeSync(copyPath);
 };
 
-const testImport = mode => async (mod, _libobjName, serveDir, port) => {
+const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) => {
     console.log('mod:', mod);
     const copyFile = '__copy.esm.js';
     const copyPath = `${serveDir}/${copyFile}`;

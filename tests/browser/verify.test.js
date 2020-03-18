@@ -1,7 +1,7 @@
 const { units } = require('./units');
 
 const { MOD_TYPE: modType, MOD_DIR: modDir, MOD_NAME: modName,
-    MOD_LIBOBJ_NAME: libobjName } = process.env;
+    MOD_LIBOBJ_NAME: libobjName, BROWSER_PRELOAD_JS: preloadJs } = process.env;
 const modPath = `${modDir}/${modName}`;
 
 const Server = require('./server');
@@ -12,7 +12,7 @@ beforeAll(async () => {
     server = await (new Server(serverDir)).listen();
     console.log('server.port:', server.port);
 
-    metaArgs = [libobjName, serverDir, server.port];
+    metaArgs = [libobjName, serverDir, server.port, preloadJs];
 });
 
 afterAll(async () => {
