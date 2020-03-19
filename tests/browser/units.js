@@ -14,26 +14,27 @@ __BODY__
 </html>
 `;
 
-const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
-    // done -- $ esp build  --debug00 --verify -m umd
-    // TODO !!!! refactor and also for `testImport()`
-    // yet -- $ esp build  --debug00 --verify -m esm
-    // yet -- $ esp build  --debug00 --verify -m esm-compat
+// $ esp build --debug --verify -m umd esm esm-compat
 
-    let preloadTag = '';
+const setupPreloadJs = (preloadJs, serveDir) => {
+    let tag = '', copyPath = '';
     if (preloadJs) {
         const copyFile = '__copy.preload.js';
-        const copyPath = `${serveDir}/${copyFile}`;
+        copyPath = `${serveDir}/${copyFile}`;
         fs.copySync(preloadJs, copyPath);
-        preloadTag = `<script src='./${copyFile}'></script> <!-- via: ${preloadJs} -->`;
+        tag = `<script src='./${copyFile}'></script> <!-- via: ${preloadJs} -->`;
     }
+    return { tag, copyPath };
+};
 
-    // TODO remove copy !!!!!!! later
-
+const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
     console.log('mod:', mod);
     const copyFile = '__copy.min.js';
     const copyPath = `${serveDir}/${copyFile}`;
     fs.copySync(mod, copyPath);
+
+    const { tag: preloadTag, copyPath: preloadCopyPath } =
+        setupPreloadJs(preloadJs, serveDir);
 
     const page = await browser.newPage();
 
@@ -41,7 +42,6 @@ const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
     const htmlPath = `${serveDir}/${htmlFile}`;
     const html = htmlTemplate
         .replace('__TITLE__', 'script tag')
-        // .replace('__BODY__', `<script src='./${copyFile}'></script>`);
         .replace('__BODY__', `${preloadTag}\n<script src='./${copyFile}'></script>`);
     fs.writeFileSync(htmlPath, html);
 
@@ -53,8 +53,10 @@ const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
     const ty = await page.evaluate((libobjName) => typeof window[libobjName], libobjName);
     expect(ty === 'function' || ty === 'object').toBe(true);
 
-    // fs.removeSync(htmlPath);
-    // fs.removeSync(copyPath);
+    // Clean up
+    fs.removeSync(htmlPath);
+    fs.removeSync(copyPath);
+    if (preloadCopyPath) { fs.removeSync(preloadCopyPath); }
 };
 
 const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) => {
