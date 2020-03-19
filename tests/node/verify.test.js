@@ -3,6 +3,7 @@ const {
     MOD_TYPE: modType,
     MOD_DIR: modDir,
     MOD_NAME: modName,
+    NODE_PRELOAD_JS: preloadJs,
 } = process.env;
 
 // $ MOD_TYPE=umd MOD_PATH=${PWD}/tests/node/target/test-mod.min.js ./jest tests/node/verify.test.js --silent false
@@ -23,10 +24,15 @@ switch (modType) {
         test('umd: static import', async () => await units['umd-import-static'](modPath));
         test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath));
         break;
-    case 'esm':
-        test('esm: static import', async () => await units['esm-import-static'](modPath));
-        test('esm: dynamic import', async () => await units['esm-import-dynamic'](modPath));
+    case 'esm': {
+        if (preloadJs) {
+            test('esm: static import; skipping (static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
+        } else {
+            test('esm: static import', async () => await units['esm-import-static'](modPath));
+        }
+        test('esm: dynamic import', async () => await units['esm-import-dynamic'](modPath, preloadJs));
         break;
+    }
     case 'esm-compat':
         test('esm-compat: require', () => units['esm-compat-require'](modPath));
         test('esm-compat: static import', async () => await units['esm-compat-import-static'](modPath));

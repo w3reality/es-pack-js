@@ -32,16 +32,32 @@ class VerifyTask {
         __log('@@ verifyScriptPath:', verifyScriptPath);
         __log('@@ nodeModulesPath:', nodeModulesPath);
 
-        let preloadJs = '';
+        // TODOs !!!!!!!!
+//                  umd     esm     esm-compat
+// babel-node       v       v       _
+// babel-browser    v       _       _
+// hoge-node        v       v       _
+// hoge-browser     v       _       _
+
+        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onBuild()`
+
+        let preloadJsNode = '';
+        if (vc.onVerifyNode) {
+            const { preloadJs: pre } = vc.onVerifyNode();
+            preloadJsNode = pre || '';
+        }
+
+        let preloadJsBrowser = '';
         if (vc.onVerifyBrowser) {
-            const { preloadJs: _preloadJs } = vc.onVerifyBrowser();
-            if (_preloadJs) preloadJs = _preloadJs;
+            const { preloadJs: pre } = vc.onVerifyBrowser();
+            preloadJsBrowser = pre || '';
         }
 
         // mode specific envs (empty for 'node' mode thus far)
-        const envsPerMode = mode === 'node' ? `` : `
+        const envsPerMode = mode === 'node' ? `
+            NODE_PRELOAD_JS=${preloadJsNode}` : `
             BROWSER_LIBOBJ_NAME=${vc.libobjname} \
-            BROWSER_PRELOAD_JS=${preloadJs}`;
+            BROWSER_PRELOAD_JS=${preloadJsBrowser}`;
 
         const cmd = `${envsPerMode} \
             MOD_TYPE=${vc.modtype} \

@@ -10,6 +10,8 @@ const HOGE = { num: 42, Hoge };
 if (typeof window !== 'undefined') {
     window.HOGE = HOGE; // browser
     window.module = {}; // shim
+} else {
+    global['HOGE'] = HOGE; // node esm dynamic import
 }
-module.exports = HOGE; // node
+module.exports = HOGE; // node umd
 

@@ -1,15 +1,20 @@
 const path = require('path');
 
 module.exports = {
+    onBuild: () => {
+        // !!!!!!!! TODO: setup symlink ./node_modules/HOGE
+    },
     onWebpackConfigCreated: config => {
         // https://webpack.js.org/configuration/externals/
         config.externals = { 'hoge': 'HOGE' };
     },
-    onVerifyNode: () => { // not being used; STUB interface
-        // nop
+    onVerifyNode: () => {
+        return {
+            preloadJs: path.resolve(__dirname, './src/hoge.js'),
+        };
     },
     onVerifyBrowser: () => {
-        return { // TODO rename to `preloadjs`
+        return {
             preloadJs: path.resolve(__dirname, './src/hoge.js'),
         };
     },

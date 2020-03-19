@@ -2,18 +2,22 @@ const os = require('os');
 const fs = require('fs-extra');
 const { _execCommand } = require('../../src/utils');
 
-const testImport = mode => async mod => {
-    const indexPath = `${os.tmpdir()}/__index.mjs`;
+const testImport = mode => async (mod, preloadJs) => {
+    const indexPath = `${os.tmpdir()}/__index_${mode}.mjs`;
+
+    // 'externals' can be supported in case of 'dynamic' mode
+    const importPreloadJs = preloadJs ? `import '${preloadJs}';` : '';
 
     const snippets = {
         'static': `
             import Mod from '${mod}';
-            console.log('static import -Mod:', Mod);
+            console.log('static import - Mod:', Mod);
             const ty = typeof Mod;
             if (ty !== 'function' && ty !== 'object') throw 1;
             process.exit(0);
         `,
         'dynamic': `
+            ${importPreloadJs}
             (async () => {
                 try {
                     const Mod = (await import('${mod}')).default;
@@ -39,15 +43,16 @@ const testImport = mode => async mod => {
         console.log('e.error:', e.error);
         hasErr = true;
     }
+
     fs.removeSync(indexPath);
 
     expect(hasErr).toBe(false);
 };
 
-const testImportWithMjs = mode => async mod => {
-    const copy = `${os.tmpdir()}/__copy.mjs`;
+const testImportWithMjs = mode => async (mod, preloadJs) => {
+    const copy = `${os.tmpdir()}/__copy_${mode}.mjs`;
     fs.copySync(mod, copy);
-    await testImport(mode)(copy);
+    await testImport(mode)(copy, preloadJs);
     fs.removeSync(copy);
 };
 
