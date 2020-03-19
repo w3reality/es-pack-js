@@ -1,7 +1,11 @@
 const { units } = require('./units');
-
-const { MOD_TYPE: modType, MOD_DIR: modDir, MOD_NAME: modName,
-    MOD_LIBOBJ_NAME: libobjName, BROWSER_PRELOAD_JS: preloadJs } = process.env;
+const {
+    MOD_TYPE: modType,
+    MOD_DIR: modDir,
+    MOD_NAME: modName,
+    BROWSER_LIBOBJ_NAME: libobjName,
+    BROWSER_PRELOAD_JS: preloadJs,
+} = process.env;
 const modPath = `${modDir}/${modName}`;
 
 const Server = require('./server');

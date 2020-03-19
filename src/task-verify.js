@@ -38,16 +38,19 @@ class VerifyTask {
             if (_preloadJs) preloadJs = _preloadJs;
         }
 
-        const cmd = `
+        // mode specific envs (empty for 'node' mode thus far)
+        const envsPerMode = mode === 'node' ? `` : `
+            BROWSER_LIBOBJ_NAME=${vc.libobjname} \
+            BROWSER_PRELOAD_JS=${preloadJs}`;
+
+        const cmd = `${envsPerMode} \
             MOD_TYPE=${vc.modtype} \
             MOD_DIR=${vc.path} \
             MOD_NAME=${vc.filename} \
-            MOD_LIBOBJ_NAME=${vc.libobjname} \
-            BROWSER_PRELOAD_JS=${preloadJs} \
             NODE_PATH=${nodeModulesPath} \
             ${jestBinPath} -c ${jestConfigPath} ${verifyScriptPath} \
             --silent false`;
-        // console.log('cmd:', cmd);
+        // console.log(`mode: ${mode} | cmd: ${cmd}`);
 
         return await execCommand(cmd, { muteStdout: true });
     }

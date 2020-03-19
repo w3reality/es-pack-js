@@ -25,7 +25,7 @@ const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
         const copyFile = '__copy.preload.js';
         const copyPath = `${serveDir}/${copyFile}`;
         fs.copySync(preloadJs, copyPath);
-        preloadTag = `<script src='./${copyFile}'></script><!-- via: ${preloadJs} -->`;
+        preloadTag = `<script src='./${copyFile}'></script> <!-- via: ${preloadJs} -->`;
     }
 
     // TODO remove copy !!!!!!! later
