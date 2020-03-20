@@ -26,7 +26,7 @@ switch (modType) {
         break;
     case 'esm': {
         if (preloadJs) {
-            test('esm: static import; skipping (static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
+            test('esm: static import (SKIP: static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
         } else {
             test('esm: static import', async () => await units['esm-import-static'](modPath));
         }

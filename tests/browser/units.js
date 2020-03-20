@@ -65,6 +65,9 @@ const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) =
     const copyPath = `${serveDir}/${copyFile}`;
     fs.copySync(mod, copyPath);
 
+    const { tag: preloadTag, copyPath: preloadCopyPath } =
+        setupPreloadJs(preloadJs, serveDir);
+
     const snippets = {
         'static': `
             import Mod from './${copyFile}';
@@ -85,8 +88,13 @@ const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) =
     const htmlPath = `${serveDir}/${htmlFile}`;
     const html = htmlTemplate
         .replace('__TITLE__', `${mode} import`)
-        .replace('__BODY__', `<script type="module">window.foo = 42; ${snippets[mode]}</script>`);
+        .replace('__BODY__', `${preloadTag}\n<script type="module">window.foo = 42; ${snippets[mode]}</script>`);
     fs.writeFileSync(htmlPath, html);
+
+    if (0) { // debug
+        fs.writeFileSync(`${serveDir}/__debug__${htmlFile}`, `<!-- preloadJs: ${preloadJs} -->${html}`);
+        fs.copySync(preloadCopyPath, `${serveDir}/__debug__preload.js`);
+    }
 
     // await page.goto(`file:${htmlPath}`); // NG per CORS
     await page.goto(`http://localhost:${port}/${htmlFile}`);
@@ -106,8 +114,10 @@ const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) =
     const ty = typeof Mod;
     expect(ty === 'function' || ty === 'object').toBe(true);
 
+    // Clean up
     fs.removeSync(htmlPath);
     fs.removeSync(copyPath);
+    if (preloadCopyPath) { fs.removeSync(preloadCopyPath); }
 };
 
 const units = {

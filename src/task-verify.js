@@ -34,11 +34,11 @@ class VerifyTask {
 
         // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onBuild()`
         // TODO --
-        //                 umd  esm  compat | main.test.js
-        // babel-node      v    v    _        _
-        // babel-browser   v    _    _        _
-        // hoge-node       v    v    _        _
-        // hoge-browser    v    _    _        _
+        //                 umd  esm    compat | main.test.js
+        // babel-node      v    v      _        _
+        // babel-browser   v    shim   _        _
+        // hoge-node       v    v      _        _
+        // hoge-browser    v    v      _        _
 
         const resolvePreloadJs = onVerifyName => {
             if (vc[onVerifyName]) {
@@ -63,7 +63,7 @@ class VerifyTask {
             }
             default: {
                 const error = new Error(`unsupported mode: ${mode}`);
-                return { error, stdout: '', stderr: '' }; // rawRet
+                return { error, stdout: '', stderr: '' }; // `rawRet`
             }
         }
 

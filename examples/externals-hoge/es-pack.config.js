@@ -2,7 +2,8 @@ const path = require('path');
 
 module.exports = {
     onBuild: () => {
-        // !!!!!!!! TODO: setup symlink ./node_modules/HOGE
+        // TODO:
+        // mkdir -p ./node_modules && ln -sf ../src/hoge.js ./node_modules/HOGE
     },
     onWebpackConfigCreated: config => {
         // https://webpack.js.org/configuration/externals/
