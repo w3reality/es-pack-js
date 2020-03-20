@@ -32,13 +32,15 @@ class VerifyTask {
         __log('@@ verifyScriptPath:', verifyScriptPath);
         __log('@@ nodeModulesPath:', nodeModulesPath);
 
-        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onBuild()`
         // TODO --
         //                 umd  esm    compat | main.test.js
         // babel-node      v    v      _        _
         // babel-browser   v    shim   _        _
         // hoge-node       v    v      _        _
         // hoge-browser    v    v      _        _
+        //
+        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onBuild()`
+        // TODO -- register examples/externals-{hoge,babel} in test:verify and test:examples
 
         const resolvePreloadJs = onVerifyName => {
             if (vc[onVerifyName]) {
