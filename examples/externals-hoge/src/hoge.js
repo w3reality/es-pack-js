@@ -11,7 +11,7 @@ if (typeof window !== 'undefined') {
     window.HOGE = HOGE; // browser
     window.module = {}; // shim
 } else {
-    global['HOGE'] = HOGE; // node esm dynamic import
+    global['HOGE'] = HOGE; // node: esm-import-dynamic, esm-compat-require, esm-compat-import-dynamic
 }
-module.exports = HOGE; // node umd
+module.exports = HOGE; // node: umd-require
 

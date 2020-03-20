@@ -34,9 +34,13 @@ switch (modType) {
         break;
     }
     case 'esm-compat':
-        test('esm-compat: require', () => units['esm-compat-require'](modPath));
-        test('esm-compat: static import', async () => await units['esm-compat-import-static'](modPath));
-        test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modPath));
+        test('esm-compat: require', () => units['esm-compat-require'](modPath, preloadJs));
+        if (preloadJs) {
+            test('esm-compat: static import (SKIP: static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
+        } else {
+            test('esm-compat: static import', async () => await units['esm-compat-import-static'](modPath));
+        }
+        test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modPath, preloadJs));
         break;
     default:
         console.log('unsupported modType:', modType);

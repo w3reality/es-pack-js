@@ -34,18 +34,18 @@ class VerifyTask {
 
         // TODO --
         //                 umd  esm    compat | main.test.js
-        // babel-node      v    v      _        _
-        // babel-browser   v    shim   _        _
-        // hoge-node       v    v      _        _
-        // hoge-browser    v    v      _        _
+        // babel-node      v    v      v        _
+        // babel-browser   v    shim   shim     _
+        // hoge-node       v    v      v        _
+        // hoge-browser    v    v      v        _
         //
-        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onBuild()`
+        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onVerify()`
         // TODO -- register examples/externals-{hoge,babel} in test:verify and test:examples
 
-        const resolvePreloadJs = onVerifyName => {
-            if (vc[onVerifyName]) {
-                const { preloadJs } = vc[onVerifyName]();
-                return preloadJs || '';
+        const _resolvePreloadJs = mode => {
+            if (vc.onVerify) {
+                const { preloadJs } = vc.onVerify();
+                return preloadJs ? (preloadJs[mode] || '') : '';
             }
             return '';
         };
@@ -54,13 +54,13 @@ class VerifyTask {
         switch (mode) {
             case 'node': {
                 envsPerMode = `
-                    NODE_PRELOAD_JS=${resolvePreloadJs('onVerifyNode')}`;
+                    NODE_PRELOAD_JS=${_resolvePreloadJs(mode)}`;
                 break;
             }
             case 'browser': {
                 envsPerMode = `
                     BROWSER_LIBOBJ_NAME=${vc.libobjname} \
-                    BROWSER_PRELOAD_JS=${resolvePreloadJs('onVerifyBrowser')}`
+                    BROWSER_PRELOAD_JS=${_resolvePreloadJs(mode)}`
                 break;
             }
             default: {

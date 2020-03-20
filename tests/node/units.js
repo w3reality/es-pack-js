@@ -67,7 +67,9 @@ const units = {
     'umd-import-dynamic': testImport('dynamic'),
     'esm-import-static': testImportWithMjs('static'),
     'esm-import-dynamic': testImportWithMjs('dynamic'),
-    'esm-compat-require': (mod) => {
+    'esm-compat-require': (mod, preloadJs) => {
+        if (preloadJs) require(preloadJs);
+
         const Mod = require(mod); // Mod: { default: { Foo: [Function: e], Bar: [Function: e] } }
         console.log('require - Mod:', Mod);
         // - also usable as UMD: https://github.com/w3reality/es6-esm-boilerplate#how-it-works

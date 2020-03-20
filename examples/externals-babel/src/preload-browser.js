@@ -1,4 +1,4 @@
-window.BABEL = {}; // SHIM for 'verify browser esm static/dynamic import'
+window.BABEL = {}; // browser SHIM: esm-import-static, esm-import-dynamic
 
 // In 'test' stages (not 'verify' stages), we should indeed
 // load ./node_modules/BABEL/babel.min.js and set up like
