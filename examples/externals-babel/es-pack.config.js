@@ -11,9 +11,9 @@ module.exports = {
         // mkdir -p ./node_modules && ln -sf ../../../node_modules/@babel/standalone ./node_modules/BABEL
         return {
             preloadJs: {
-                node: path.resolve(__dirname, './src/preload-node.js'),
+                node: path.resolve(__dirname, './tests/node/preload.js'),
                 //browser: path.resolve(__dirname, './node_modules/BABEL/babel.min.js'),
-                browser: path.resolve(__dirname, './src/preload-browser.js'), // SHIM approach
+                browser: path.resolve(__dirname, './tests/browser/preload.js'), // SHIM approach
             },//-----
         };
     },
