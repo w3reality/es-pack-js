@@ -6,15 +6,12 @@ module.exports = {
         // { '<module's name in index.js>': '<module's name under node_modules/>' }
         config.externals = { '@babel/standalone': 'BABEL' };
     },
-    onVerify: () => {
+    onVerify: (preloadJs) => {
         // !!!! TODO --
         // mkdir -p ./node_modules && ln -sf ../../../node_modules/@babel/standalone ./node_modules/BABEL
-        return {
-            preloadJs: {
-                node: path.resolve(__dirname, './tests/node/preload.js'),
-                //browser: path.resolve(__dirname, './node_modules/BABEL/babel.min.js'),
-                browser: path.resolve(__dirname, './tests/browser/preload.js'), // SHIM approach
-            },//-----
-        };
+
+        preloadJs.node = path.resolve(__dirname, './tests/node/preload.js');
+        // preloadJs.browser = path.resolve(__dirname, './node_modules/BABEL/babel.min.js'); // NG in this case because the external symbol exposed is `Babal` not `BABEL`
+        preloadJs.browser = path.resolve(__dirname, './tests/browser/preload.js'); // SHIM approach
     },
 };

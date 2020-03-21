@@ -5,15 +5,11 @@ module.exports = {
         // https://webpack.js.org/configuration/externals/
         config.externals = { 'hoge': 'HOGE' };
     },
-    onVerify: () => {
+    onVerify: (preloadJs) => {
         // !!!! TODO --
         // mkdir -p ./node_modules && ln -sf ../src/hoge.js ./node_modules/HOGE
 
-        return {
-            preloadJs: {
-                node: path.resolve(__dirname, './src/hoge.js'),
-                browser: path.resolve(__dirname, './src/hoge.js'),
-            },
-        };
+        preloadJs.node = path.resolve(__dirname, './src/hoge.js');
+        preloadJs.browser = path.resolve(__dirname, './src/hoge.js');
     },
 };

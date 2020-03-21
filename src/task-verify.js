@@ -42,25 +42,22 @@ class VerifyTask {
         // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onVerify()`
         // TODO -- register examples/externals-{hoge,babel} in test:verify and test:examples
 
-        const _resolvePreloadJs = mode => {
-            if (vc.onVerify) {
-                const { preloadJs } = vc.onVerify();
-                return preloadJs ? (preloadJs[mode] || '') : '';
-            }
-            return '';
-        };
+        const preloadJs = { node: '', browser: '' }; // defaults
+        if (vc.onVerify) {
+            vc.onVerify(preloadJs);
+        }
 
         let envsPerMode; // mode specific envs
         switch (mode) {
             case 'node': {
                 envsPerMode = `
-                    NODE_PRELOAD_JS=${_resolvePreloadJs(mode)}`;
+                    NODE_PRELOAD_JS=${preloadJs[mode]}`;
                 break;
             }
             case 'browser': {
                 envsPerMode = `
                     BROWSER_LIBOBJ_NAME=${vc.libobjname} \
-                    BROWSER_PRELOAD_JS=${_resolvePreloadJs(mode)}`
+                    BROWSER_PRELOAD_JS=${preloadJs[mode]}`
                 break;
             }
             default: {
