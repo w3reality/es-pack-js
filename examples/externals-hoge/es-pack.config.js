@@ -1,9 +1,9 @@
 const path = require('path');
 
 module.exports = {
-    onWebpackConfigCreated: config => {
+    onBundle: (webpackConfig) => {
         // https://webpack.js.org/configuration/externals/
-        config.externals = { 'hoge': 'HOGE' };
+        webpackConfig.externals = { 'hoge': 'HOGE' };
     },
     onVerify: (preloadJs) => {
         // !!!! TODO --

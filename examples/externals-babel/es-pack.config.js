@@ -1,10 +1,10 @@
 const path = require('path');
 
 module.exports = {
-    onWebpackConfigCreated: config => {
+    onBundle: (webpackConfig) => {
         // https://webpack.js.org/configuration/externals/
         // { '<module's name in index.js>': '<module's name under node_modules/>' }
-        config.externals = { '@babel/standalone': 'BABEL' };
+        webpackConfig.externals = { '@babel/standalone': 'BABEL' };
     },
     onVerify: (preloadJs) => {
         // !!!! TODO --

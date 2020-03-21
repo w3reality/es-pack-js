@@ -103,8 +103,10 @@ class EsPack {
 
             const wpConfig = BundleTask.createWpConfig(seed);
 
-            const { onWebpackConfigCreated: cb } = extConfig || {};
-            if (cb) cb(wpConfig);
+            const { onBundle } = extConfig || {};
+            if (onBundle) {
+                onBundle(wpConfig);
+            }
 
             __log('@@ wpConfig:', wpConfig);
             cache[modtype] = wpConfig;
@@ -115,9 +117,8 @@ class EsPack {
             for (let [modtype, wpConfig] of Object.entries(cache)) {
                 if (modtype === 'dev') continue;
 
-                const { onVerify } = extConfig || {};
-
                 const { path, filename, library: libobjname } = wpConfig.output;
+                const { onVerify } = extConfig || {};
                 const veriConfig = { modtype, path, filename, libobjname,
                     onVerify };
 
