@@ -54,10 +54,41 @@ class EsPack {
         this.tasks = tasksAcc;
     }
 
+    static checkExtConfig(extName, extConfig) {
+        const props = {
+            'onBundle': 'function',
+            'onVerify': 'function',
+        };
+
+        const pairs = [];
+        for (const [key, value] of Object.entries(props)) {
+            pairs.push(`${key} (${value})`);
+        }
+        let propsStr = pairs.join(', ') + '.';
+        const usage = `In ${extName} these properties are valid: ${propsStr}`;
+
+        for (const [key, value] of Object.entries(extConfig)) {
+            let err;
+            if (!(key in props)) {
+                err = new Error(`Configuration has an unknown property: '${key}'.\n${usage}\n`);
+            } else if (props[key] !== typeof value) {
+                err = new Error(`Wrong type '${typeof value}' for configuration property '${key}' (expected '${props[key]}').\n${usage}\n`);
+            } else {
+                return; // ok
+            }
+            throw err;
+        }
+    }
     static getExtConfig(basedir) {
-        const extPath = path.resolve(`${basedir}/es-pack.config.js`);
+        const extName = 'es-pack.config.js';
+        const extPath = path.resolve(`${basedir}/${extName}`);
         const extConfig = fs.existsSync(extPath) ? require(extPath) : null;
         __log(`@@ ${extConfig ? '' : 'NOT '}detected - ext: ${extPath}`);
+
+        if (extConfig) {
+            this.checkExtConfig(extName, extConfig);
+        }
+
         return extConfig;
     }
 

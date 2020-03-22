@@ -60,11 +60,16 @@ test('exit_code: bare', async () => {
 test('exit_code: build', async () => {
     expect(await exitCodeOf(`${esp} build ${modPath}`)).toBe('0');
 });
-test('exit_code: build noexist', async () => {
+test('exit_code: build - noexist', async () => {
     expect(await exitCodeOf(`${esp} build ${modPath}_noexist`)).toBe('1');
 });
-test('exit_code: build WebpackOptionsValidationError', async () => {
+test('exit_code: build - WebpackOptionsValidationError', async () => {
     const examplePath = pathRelTests('../examples/webpack-exception');
+    expect(fs.existsSync(examplePath)).toBe(true);
+    expect(await exitCodeOf(`${esp} build ${examplePath}`)).toBe('1');
+});
+test('exit_code: build - wrong external config property', async () => {
+    const examplePath = pathRelTests('../examples/extconfig-exception');
     expect(fs.existsSync(examplePath)).toBe(true);
     expect(await exitCodeOf(`${esp} build ${examplePath}`)).toBe('1');
 });
@@ -73,9 +78,9 @@ test('exit_code: test', async () => {
     // PASS examples/base/tests/node/will-pass.test.js
     expect(await exitCodeOf(`${esp} test --node ${modPath}`)).toBe('0');
 });
-test('exit_code: test noexist', async () => {
+test('exit_code: test - noexist', async () => {
     expect(await exitCodeOf(`${esp} test --node ${modPath}_noexist`)).toBe('1');
 });
-test('exit_code: test demand at least one preset', async () => {
+test('exit_code: test - demand at least one preset', async () => {
     expect(await exitCodeOf(`${esp} test ${modPath}`)).toBe('1');
 });
