@@ -11,7 +11,7 @@
         "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:ex",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
-        "test:verify": "npm run test:verify:base && npm run test:verify:hoge && npm run test:verify:babel",
+        "test:verify": "npm run test:verify:base && npm run test:verify:hoge && npm run test:verify:babel && npm run test:verify:extconfig",
         "test:ex": "npm run test:ex:base && npm run test:ex:hoge && npm run test:ex:babel",
         "test:verify:base": "bin/es-pack build examples/base -m umd esm esm-compat --verify",
         "test:verify:hoge": "bin/es-pack build examples/externals-hoge -m umd esm esm-compat --verify",
