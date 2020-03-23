@@ -32,13 +32,6 @@ class VerifyTask {
         __log('@@ verifyScriptPath:', verifyScriptPath);
         __log('@@ nodeModulesPath:', nodeModulesPath);
 
-        // TODO --
-        //                 umd  esm    compat | main.test.js
-        // babel-node      v    v      v        _
-        // babel-browser   v    shim   shim     _
-        // hoge-node       v    v      v        _
-        // hoge-browser    v    v      v        _
-
         const preloadJs = { node: '', browser: '' }; // defaults
         if (vc.onVerify) {
             vc.onVerify(preloadJs);

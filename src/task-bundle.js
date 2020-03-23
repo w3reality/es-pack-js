@@ -133,6 +133,32 @@ class BundleTask {
         }
     }
 
+    static applyCustom(onBundle, wpConfig) {
+        const { filename: filenameOrig, library: libraryOrig } = wpConfig.output;
+        onBundle(wpConfig);
+        const { filename, library } = wpConfig.output;
+
+        // Update the `Var2EsmPlugin` instance if necessary
+        if (filename !== filenameOrig || library !== libraryOrig) {
+            // console.log(`output.filename: ${filenameOrig} -> ${filename}`);
+            // console.log(`output.library: ${libraryOrig} -> ${library}`);
+            const { plugins } = wpConfig;
+            plugins.forEach((pi, idx) => {
+                if (pi.constructor.name === 'Var2EsmPlugin') {
+                    // console.log('pi, idx:', pi, idx);
+
+                    plugins.splice(idx, 1); // remove the item at `idx`
+
+                    const piNew = new Var2EsmPlugin(library, filename,
+                        filename.endsWith('.esm.compat.js'));
+                    plugins.splice(idx, 0, piNew); // insert an item at `idx`
+
+                    // console.log('plugins:', plugins);
+                }
+            });
+        }
+    }
+
     static createWpConfig(wpSeed) {
         const modType = wpSeed.modtype || 'umd';
         const libName = wpSeed.libname || 'my-mod'; // or pkg.name

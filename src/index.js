@@ -136,7 +136,7 @@ class EsPack {
 
             const { onBundle } = extConfig || {};
             if (onBundle) {
-                onBundle(wpConfig);
+                BundleTask.applyCustom(onBundle, wpConfig);
             }
 
             __log('@@ wpConfig:', wpConfig);
