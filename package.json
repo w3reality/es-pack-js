@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.3.3-dev.1",
+    "version": "0.3.3-dev.2",
     "description": "Build portable modules from JavaScript codebase",
     "bin": {
         "es-pack": "bin/es-pack"
@@ -8,11 +8,17 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:examples",
+        "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:ex",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
-        "test:verify": "bin/es-pack build examples/base -m umd esm esm-compat --verify",
-        "test:examples": "bin/es-pack test examples/base --node --browser"
+        "test:verify": "npm run test:verify:base && npm run test:verify:hoge && npm run test:verify:babel",
+        "test:ex": "npm run test:ex:base && npm run test:ex:hoge && npm run test:ex:babel",
+        "test:verify:base": "bin/es-pack build examples/base -m umd esm esm-compat --verify",
+        "test:verify:hoge": "bin/es-pack build examples/externals-hoge -m umd esm esm-compat --verify",
+        "test:verify:babel": "bin/es-pack build examples/externals-babel -m umd esm esm-compat --verify",
+        "test:ex:base": "bin/es-pack test examples/base --node --browser",
+        "test:ex:hoge": "bin/es-pack test examples/externals-hoge --node --browser",
+        "test:ex:babel": "bin/es-pack test examples/externals-babel --node --browser"
     },
     "repository": {
         "type": "git",

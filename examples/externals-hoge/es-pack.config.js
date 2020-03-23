@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 module.exports = {
     onBundle: (webpackConfig) => {
@@ -6,8 +7,13 @@ module.exports = {
         webpackConfig.externals = { 'hoge': 'HOGE' };
     },
     onVerify: (preloadJs) => {
-        // !!!! TODO --
-        // mkdir -p ./node_modules && ln -sf ../src/hoge.js ./node_modules/HOGE
+        // ├── node_modules
+        // │   └── HOGE -> ../src/hoge.js
+        const pathNm = path.resolve(__dirname, './node_modules');
+        const pathSymlink = pathNm + '/HOGE';
+        try { fs.mkdirSync(pathNm); } catch (_) {}
+        try { fs.unlinkSync(pathSymlink); } catch (_) {}
+        try { fs.symlinkSync('../src/hoge.js', pathSymlink); } catch (_) {}
 
         preloadJs.node = path.resolve(__dirname, './src/hoge.js');
         preloadJs.browser = path.resolve(__dirname, './src/hoge.js');

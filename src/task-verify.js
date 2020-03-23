@@ -38,9 +38,6 @@ class VerifyTask {
         // babel-browser   v    shim   shim     _
         // hoge-node       v    v      v        _
         // hoge-browser    v    v      v        _
-        //
-        // TODO -- externals (BABEL, HOGE) symlink node_modules/*  by `onVerify()`
-        // TODO -- register examples/externals-{hoge,babel} in test:verify and test:examples
 
         const preloadJs = { node: '', browser: '' }; // defaults
         if (vc.onVerify) {
