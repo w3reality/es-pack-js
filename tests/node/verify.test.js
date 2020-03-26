@@ -20,7 +20,7 @@ const modPath = `${modDir}/${modName}`;
 
 switch (modType) {
     case 'umd':
-        test('umd: require', () => units['umd-require'](modPath));
+        test('umd: require', () => units['umd-require'](modPath, preloadJs));
         test('umd: static import', async () => await units['umd-import-static'](modPath));
         test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath));
         break;
