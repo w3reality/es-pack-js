@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>tests</title>
+</head>
+<body>
+    <script src="__hoge.js"></script>
+    <script src="__tmp.min.js"></script>
+    <script type="module">
+        const output = {};
+
+        // test 'constructor'
+        const Foo = window.NoPkgName;
+        output['constructor'] = typeof Foo;
+
+        // test '`new`'
+        const foo = new Foo();
+        const ret = [];
+        ret.push(typeof foo.ver);
+        ret.push(foo.sth);
+        output['new'] = ret;
+
+        // store results
+        window['output'] = output;
+    </script>
+</body>
+</html>
+
