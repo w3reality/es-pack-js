@@ -22,7 +22,7 @@ switch (modType) {
     case 'umd':
         test('umd: require', () => units['umd-require'](modPath, preloadJs));
         test('umd: static import', async () => await units['umd-import-static'](modPath));
-        test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath, preloadJs));
+        test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath));
         break;
     case 'esm': {
         if (preloadJs) {
