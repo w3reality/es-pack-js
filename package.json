@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.3.3-rc.1",
+    "version": "0.3.3-rc.0",
     "description": "Build portable modules from JavaScript codebase",
     "bin": {
         "es-pack": "bin/es-pack"

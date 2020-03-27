@@ -57,9 +57,7 @@ const testImportWithMjs = mode => async (mod, preloadJs) => {
 };
 
 const units = {
-    'umd-require': (mod, preloadJs) => {
-        if (preloadJs) require(preloadJs);
-
+    'umd-require': (mod) => {
         const Mod = require(mod);
         console.log('require - Mod:', Mod);
         const ty = typeof Mod;
