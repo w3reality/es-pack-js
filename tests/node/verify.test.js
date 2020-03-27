@@ -21,11 +21,7 @@ const modPath = `${modDir}/${modName}`;
 switch (modType) {
     case 'umd':
         test('umd: require', () => units['umd-require'](modPath, preloadJs));
-        if (preloadJs) {
-            test('umd: static import (SKIP: static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
-        } else {
-            test('umd: static import', async () => await units['umd-import-static'](modPath));
-        }
+        test('umd: static import', async () => await units['umd-import-static'](modPath));
         test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath, preloadJs));
         break;
     case 'esm': {
