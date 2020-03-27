@@ -43,6 +43,7 @@ class TestTask {
             NODE_PATH=${nodeModulesPath} \
             ${jestBinPath} -c ${jestConfigPath} \
             --rootDir ${rootDir} \
+            --passWithNoTests \
             --silent false`;
 
         return await execCommand(cmd, { muteStdout: true });
