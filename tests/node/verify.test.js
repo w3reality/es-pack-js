@@ -4,43 +4,87 @@ const {
     MOD_DIR: modDir,
     MOD_NAME: modName,
     NODE_PRELOAD_JS: preloadJs,
+    NODE_UNITS: veriUnits,
 } = process.env;
 
-// $ MOD_TYPE=umd MOD_PATH=${PWD}/tests/node/target/test-mod.min.js ./jest tests/node/verify.test.js --silent false
-// $ MOD_TYPE=esm MOD_PATH=${PWD}/tests/node/target/test-mod.esm.js  ./jest tests/node/verify.test.js --silent false
-// $ MOD_TYPE=esm-compat MOD_PATH=${PWD}/tests/node/target/test-mod.esm.compat.js  ./jest tests/node/verify.test.js --silent false
-
-test('env_vals', () => {
-    expect(typeof modType).toBe('string');
-    expect(typeof modDir).toBe('string');
-    expect(typeof modName).toBe('string');
-});
-
+if (typeof modType !== 'string') throw new Error('Invalid `modType`');
+if (typeof modDir !== 'string') throw new Error('Invalid `modDir`');
+if (typeof modName !== 'string') throw new Error('Invalid `modName`');
 const modPath = `${modDir}/${modName}`;
+
+const _veriUnits = veriUnits ? veriUnits.split(',') : null;
+const takeUnit = key => !_veriUnits || _veriUnits.includes(key);
+const testSkipNoTake = unit => test(`unit: ${unit} [SKIP: due to \`units.node\`]`, () => expect(0).toBe(0));
+
+const testSkipNoSupport = unit => test(`unit: ${unit} [SKIP: static import with \`preloadJs.node\`]`, () => expect(0).toBe(0));
 
 switch (modType) {
     case 'umd':
-        test('umd: require', () => units['umd-require'](modPath));
-        test('umd: static import', async () => await units['umd-import-static'](modPath));
-        test('umd: dynamic import', async () => await units['umd-import-dynamic'](modPath));
+        {
+            const unit = 'umd-require';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, () => units[unit](modPath)) :
+                testSkipNoTake(unit);
+        }
+
+        {
+            const unit = 'umd-import-static';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, async () => await units[unit](modPath)) :
+                testSkipNoTake(unit);
+        }
+
+        {
+            const unit = 'umd-import-dynamic';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, async () => await units[unit](modPath)) :
+                testSkipNoTake(unit);
+        }
+
         break;
     case 'esm': {
-        if (preloadJs) {
-            test('esm: static import (SKIP: static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
-        } else {
-            test('esm: static import', async () => await units['esm-import-static'](modPath));
+        {
+            const unit = 'esm-import-static';
+            takeUnit(unit) ?
+                (preloadJs ?
+                    testSkipNoSupport(unit) :
+                    test(`unit: ${unit}`, async () => await units[unit](modPath))) :
+                testSkipNoTake(unit);
         }
-        test('esm: dynamic import', async () => await units['esm-import-dynamic'](modPath, preloadJs));
+
+        {
+            const unit = 'esm-import-dynamic';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, async () => await units[unit](modPath, preloadJs)) :
+                testSkipNoTake(unit);
+        }
+
         break;
     }
     case 'esm-compat':
-        test('esm-compat: require', () => units['esm-compat-require'](modPath, preloadJs));
-        if (preloadJs) {
-            test('esm-compat: static import (SKIP: static import with NODE_PRELOAD_JS)', () => expect(0).toBe(0));
-        } else {
-            test('esm-compat: static import', async () => await units['esm-compat-import-static'](modPath));
+        {
+            const unit = 'esm-compat-require';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, async () => await units[unit](modPath, preloadJs)) :
+                testSkipNoTake(unit);
         }
-        test('esm-compat: dynamic import', async () => await units['esm-compat-import-dynamic'](modPath, preloadJs));
+
+        {
+            const unit = 'esm-compat-import-static';
+            takeUnit(unit) ?
+                (preloadJs ?
+                    testSkipNoSupport(unit) :
+                    test(`unit: ${unit}`, async () => await units[unit](modPath))) :
+                testSkipNoTake(unit);
+        }
+
+        {
+            const unit = 'esm-compat-import-dynamic';
+            takeUnit(unit) ?
+                test(`unit: ${unit}`, async () => await units[unit](modPath, preloadJs)) :
+                testSkipNoTake(unit);
+        }
+
         break;
     default:
         console.log('unsupported modType:', modType);

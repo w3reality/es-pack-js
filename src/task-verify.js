@@ -33,21 +33,24 @@ class VerifyTask {
         __log('@@ nodeModulesPath:', nodeModulesPath);
 
         const preloadJs = { node: '', browser: '' }; // defaults
+        const veriUnits = { node: [], browser: [] }; // defaults
         if (vc.onVerify) {
-            vc.onVerify(preloadJs);
+            vc.onVerify(preloadJs, veriUnits);
         }
 
         let envsPerMode; // mode specific envs
         switch (mode) {
             case 'node': {
                 envsPerMode = `
-                    NODE_PRELOAD_JS=${preloadJs[mode]}`;
+                    NODE_PRELOAD_JS=${preloadJs[mode]} \
+                    NODE_UNITS=${veriUnits[mode]}`;
                 break;
             }
             case 'browser': {
                 envsPerMode = `
                     BROWSER_LIBOBJ_NAME=${vc.libobjname} \
-                    BROWSER_PRELOAD_JS=${preloadJs[mode]}`
+                    BROWSER_PRELOAD_JS=${preloadJs[mode]} \
+                    BROWSER_UNITS=${veriUnits[mode]}`
                 break;
             }
             default: {
