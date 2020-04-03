@@ -105,14 +105,14 @@ class EsPack {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
 
-        const { ba, verify, rustwasm } = _argv;
+        const { ba, verify, rustwasm, devWithTts } = _argv;
         return {
             basedir, extConfig,
-            modarray: _argv.dev ? ['dev'] : (_argv.module || ['umd']),
+            modarray: (_argv.dev || devWithTts) ? ['dev'] : (_argv.module || ['umd']),
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || this.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
-            ba, verify, rustwasm,
+            ba, verify, rustwasm, devWithTts,
         };
     }
 
@@ -136,12 +136,15 @@ class EsPack {
 
             const { onBundle } = extConfig || {};
             if (onBundle) {
+                // TODO: might provide something that facilites the `globals` option in 'eslint-loader'
+                // e.g. https://github.com/w3reality/three-geo/blob/21ae2bc18531b8bbb577692d1253fb40d63f02d9/examples/geo-viewer/webpack.config.js#L58
+
                 BundleTask.applyCustom(onBundle, wpConfig);
             }
 
             __log('@@ wpConfig:', wpConfig);
             cache[modtype] = wpConfig;
-            tasksAcc.push(['task-bundle', async () => (new BundleTask(wpConfig, __log)).run()]);
+            tasksAcc.push(['task-bundle', async () => (new BundleTask(wpConfig, buildConfig)).run()]);
         }
 
         if (buildConfig.verify) {
@@ -153,7 +156,7 @@ class EsPack {
                 const veriConfig = { modtype, path, filename, libobjname,
                     onVerify };
 
-                tasksAcc.push(['task-verify', async () => (new VerifyTask(veriConfig, __log)).run()]);
+                tasksAcc.push(['task-verify', async () => (new VerifyTask(veriConfig)).run()]);
             }
         }
     }
@@ -177,7 +180,7 @@ class EsPack {
     static pushTestTasks(tasksAcc, testConfig) {
         __log('@@ testConfig:', testConfig);
 
-        tasksAcc.push(['task-test', async () => (new TestTask(testConfig, __log)).run()]);
+        tasksAcc.push(['task-test', async () => (new TestTask(testConfig)).run()]);
     }
 
     static resolveNpmName(basedir) {
@@ -222,6 +225,11 @@ class EsPack {
                     },
                     'dev': {
                         describe: 'Toggle behavior as `webpack --mode development --watch`',
+                        boolean: true,
+                        default: false,
+                    },
+                    'dev-with-tts': {
+                        describe: '`--dev` with audio feedback',
                         boolean: true,
                         default: false,
                     },

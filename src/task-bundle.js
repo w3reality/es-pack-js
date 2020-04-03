@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
+const { exec } = require('child_process');
 
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -9,12 +10,13 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const { Ret } = require('./utils');
 
 class BundleTask {
-    constructor(wpConfig) {
+    constructor(wpConfig, buildConfig) {
         this.wpConfig = wpConfig;
+        this.buildConfig = buildConfig;
     }
 
     async run() {
-        const { wpConfig } = this;
+        const { wpConfig, buildConfig } = this;
         const ret = new Ret();
 
         const { output } = wpConfig;
@@ -22,13 +24,26 @@ class BundleTask {
         __log('@@ output.filename:', output.filename);
 
         try {
-            await BundleTask._run(wpConfig, ret);
+            await BundleTask._run(wpConfig, buildConfig, ret);
         } catch (_) { /* nop */ }
 
         return ret;
     }
 
-    static async _run(wpConfig, ret) {
+    static devWithTtsFeedback(errors) {
+        const cmdSay = '/usr/bin/say'; // macOS
+        const cmdFestival = '/usr/bin/festival'; // Ubuntu: $ sudo apt install festival
+        const sth = errors ? 'errors': 'ok'
+        if (fs.existsSync(cmdSay)) {
+            exec(`${cmdSay} ${sth}`);
+        } else if (fs.existsSync(cmdFestival)) {
+            exec(`echo ${sth} | ${cmdFestival} --tts`);
+        } else {
+            console.log(`\n⚠️  TTS-feedback requested, but neither of the following available:\n${cmdSay}\n${cmdFestival}`);
+        }
+    }
+
+    static async _run(wpConfig, buildConfig, ret) {
         return new Promise((res, rej) => {
             try {
                 webpack(wpConfig, (err, stats) => {
@@ -43,8 +58,13 @@ class BundleTask {
                     // }
 
                     if (wpConfig.watch) {
-                        const _errors = this.processWpStats(stats, console.log);
+                        const errors = this.processWpStats(stats, console.log);
+
+                        if (buildConfig.devWithTts) {
+                            this.devWithTtsFeedback(errors);
+                        }
                         console.log('\n👀');
+
                         // no res/rej; enter looping
                     } else {
                         const print = ret.err.bind(ret);
