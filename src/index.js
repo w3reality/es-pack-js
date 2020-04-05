@@ -98,9 +98,10 @@ class EsPack {
 
         let pkgName = 'no-pkg-name';
         try {
-            pkgName = _argv.rustwasm ?
+            const _pkgName = _argv.rustwasm ?
                 this.resolveCrateName(basedir) :
                 this.resolveNpmName(basedir);
+            pkgName = _pkgName || pkgName;
         } catch (err) {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
