@@ -6,7 +6,7 @@ Setting up in an NPM project:
 $ mkdir add
 $ cd add
 $ npm init
-$ npm i -D es-pack-js
+$ npm i -D es-pack-js  # ⬇️
 ```
 
 Invoking the `es-pack` command:
@@ -39,7 +39,7 @@ task-bundle: 🌀 spinning...
 task-bundle: ✅ done
 ```
 
-Testing the UMD module with NodeJS:
+Exercising the UMD module with NodeJS:
 
 ```
 $ node
@@ -51,7 +51,7 @@ Type ".help" for more information.
 3
 ```
 
-Building with the module type option `-m`:
+Building modules with the `-m` option:
 
 ```
 $ ./node_modules/es-pack-js/bin/es-pack build -m umd esm esm-compat
@@ -73,7 +73,7 @@ task-bundle: 🌀 spinning...
 task-bundle: ✅ done
 ```
 
-More options avaialble:
+More options:
 
 ```
 $ ./node_modules/es-pack-js/bin/es-pack build -h
