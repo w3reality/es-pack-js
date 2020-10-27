@@ -1,16 +1,24 @@
+global.require = require;
 const path = require('path');
 
 const libName = 'no-pkg-name';
 const outDir = path.join(__dirname, '../../target');
+
 const __modPath = `${outDir}/${libName}.min.js`;
+// const __modPath = `${outDir}/${libName}.js`; // dev !!
 
 const Foo = require(__modPath);
-test('constructor', () => {
-    expect(typeof Foo).toBe('function');
-});
 
-const foo = new Foo();
-test('`new`', () => {
-    expect(typeof foo.ver).toBe('string');
+const { Meta } = Foo;
+
+test('`foo.sth`', () => {
+    const foo = new Foo();
     expect(foo.sth).toBe(42);
+});
+test('`Meta.isNodeJS()`', () => {
+    expect(Meta.isNodeJS()).toBeTruthy();
+});
+test('`Meta.Delta`', async () => {
+    const delta = await Meta.Delta.new();
+    expect(typeof delta.get()).toBe('number');
 });

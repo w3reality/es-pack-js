@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
-const { Server } = require('../../../../src/index');
+const { Server } = require('../../../../src');
 
 const libName = 'no-pkg-name';
 const outDir = path.join(__dirname, '../../target');
@@ -34,10 +34,6 @@ afterAll(async () => {
 test('output', () => {
     expect(typeof output).toBe('object');
 });
-test('constructor', () => {
-    expect(output['constructor']).toBe('function');
+test('misc', () => {
+    expect(output['results']).toEqual([42, false, 'number']);
 });
-test('`new`', () => {
-    expect(output['new']).toEqual(['string', 42]);
-});
-

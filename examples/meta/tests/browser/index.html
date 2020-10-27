@@ -8,21 +8,22 @@
     <script src="__tmp.min.js"></script>
     <script type="module">
         const output = {};
+        const Foo = NoPkgName;
 
-        // test 'constructor'
-        const Foo = window.NoPkgName;
-        output['constructor'] = typeof Foo;
+        (async () => {
+            const { Meta } = Foo;
+            const delta = await Meta.Delta.new();
 
-        // test '`new`'
-        const foo = new Foo();
-        const ret = [];
-        ret.push(typeof foo.ver);
-        ret.push(foo.sth);
-        output['new'] = ret;
+            // no object references can be returned!!
+            output['results'] = [
+                (new Foo()).sth , // 42
+                Meta.isNodeJS(), // false
+                typeof delta.get(), // 'number'
+            ];
 
-        // store results
-        window['output'] = output;
+            // store results
+            window['output'] = output;
+        })();
     </script>
 </body>
 </html>
-

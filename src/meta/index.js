@@ -11,6 +11,8 @@ class Meta {
     static async nodeRequire(_global, mod) { // {classic,es}-context agnostic wrapper
         const req = typeof _global.require === 'function' ? _global.require : null;
         const imp = typeof _global.import === 'function' ? _global.import : null;
+        if (!req && !imp) throw 'oops; maybe you should add `global.require = require;` in test script.';
+
         return req ? req(mod) : (await imp(mod)).default;
     }
 }
