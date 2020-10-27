@@ -1,6 +1,6 @@
 
 class Meta {
-    static _consoleLog(...args) {
+    static consoleLog(...args) {
         // for eluding uglify
         const _console = console;
         _console.log.apply(_console, args);
