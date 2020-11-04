@@ -209,6 +209,7 @@ class BundleTask {
             throw 'exiting...';
         }
 
+        const localNodeModules = `${__dirname}/../node_modules`;
         return {
             plugins,
             watch: isDev,
@@ -241,17 +242,17 @@ class BundleTask {
                 rules: [
                     {
                         test: /(\.jsx|\.js)$/,
-                        loader: 'babel-loader',
+                        loader: `${localNodeModules}/babel-loader`,
                         options: { // instead of .babelrc -- https://github.com/babel/babel-loader#usage
-                            presets: [['@babel/preset-env', {modules: false}]]
+                            presets: [[`${localNodeModules}/@babel/preset-env`, {modules: false}]]
                         },
                         exclude: /(node_modules|bower_components)/
                     },
                     {
                         test: /(\.jsx|\.js)$/,
-                        loader: 'eslint-loader',
+                        loader: `${localNodeModules}/eslint-loader`,
                         options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
-                            parser: 'babel-eslint'
+                            parser: `${localNodeModules}/babel-eslint`
                         },
                         exclude: /node_modules/
                     }
