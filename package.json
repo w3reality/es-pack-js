@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.3.8-alpha.3",
+    "version": "0.3.8",
     "description": "Build and test portable JavaScript modules",
     "bin": {
         "es-pack": "bin/es-pack"
