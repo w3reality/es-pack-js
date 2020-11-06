@@ -71,7 +71,7 @@ class BundleTask {
                         const printMute = str => print(str, true);
                         const errors = this.processWpStats(stats, print, printMute);
                         if (errors) {
-                            rej(ret.setErrorInfo(errors, `\n${errors.join()}`));
+                            rej(ret.setErrorInfo(errors, `\n${errors.join('\n')}`));
                         } else {
                             res();
                         }
@@ -92,14 +92,13 @@ class BundleTask {
         // console.log('hasErrors, hasWarnings:', stats.hasErrors(), stats.hasWarnings());
 
         if (stats.hasWarnings()) {
-            this.processInfoMsgs(info.warnings, print);
+            // this.processInfoMsgs(info.warnings, print);
+            this.processInfoObjects('⚠️ ', info.warnings, print);
         }
 
-        let errors = undefined;
+        let errMsgs = undefined;
         if (stats.hasErrors()) {
-            errors = info.errors;
-
-            this.processInfoMsgs(errors, printMute || print);
+            errMsgs = this.processInfoObjects('❌ ', info.errors, printMute || print);
 
             for (let asset of info.assets) {
                 const residue = `${info.outputPath}/${asset.name}`;
@@ -112,15 +111,19 @@ class BundleTask {
             this.summarizeInfo(info, print);
         }
 
-        return errors;
+        return errMsgs;
     }
-    static processInfoMsgs(msgs, print) {
-        print(msgs.join('')); // suffice to do this ??
-        //====
-        // for (let msg of msgs) {
-        //     msg.split('\n').forEach(line => print(line));
-        // }
+
+    static processInfoObjects(ty, objs, print) {
+        // console.log('processInfoObjects(): objs:', objs);
+        const msgs = objs.map(obj => {
+            const { moduleName, loc, message } = obj;
+            return `${ty} [${moduleName}@${loc}] ${message}\n`;
+        });
+        msgs.forEach(msg => print(msg));
+        return msgs;
     }
+
     static summarizeInfo(info, print) {
         const _how = sth => sth.built ? '[built]' : (sth.emitted ? '[emitted]' : '');
 
