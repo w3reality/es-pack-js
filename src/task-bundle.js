@@ -4,8 +4,8 @@ const { exec } = require('child_process');
 
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
-const Var2EsmPlugin = require('webpack-var2esm-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const Var2EsmPlugin = require('./var2esm');
 
 const { Ret } = require('./utils');
 
