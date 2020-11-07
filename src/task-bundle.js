@@ -30,10 +30,10 @@ class BundleTask {
         return ret;
     }
 
-    static devWithTtsFeedback(errors) {
+    static devWithTtsFeedback(hasErrors) {
         const cmdSay = '/usr/bin/say'; // macOS
         const cmdFestival = '/usr/bin/festival'; // Ubuntu: $ sudo apt install festival
-        const sth = errors ? 'errors': 'ok'
+        const sth = hasErrors ? 'errors' : 'ok';
         if (fs.existsSync(cmdSay)) {
             exec(`${cmdSay} ${sth}`);
         } else if (fs.existsSync(cmdFestival)) {
@@ -58,10 +58,10 @@ class BundleTask {
                     // }
 
                     if (wpConfig.watch) {
-                        const errors = this.processWpStats(stats, console.log);
+                        const errMsgs = this.processWpStats(stats, console.log);
 
                         if (buildConfig.devWithTts) {
-                            this.devWithTtsFeedback(errors);
+                            this.devWithTtsFeedback(errMsgs !== null);
                         }
                         console.log('\n👀');
 
@@ -69,9 +69,9 @@ class BundleTask {
                     } else {
                         const print = ret.err.bind(ret);
                         const printMute = str => print(str, true);
-                        const errors = this.processWpStats(stats, print, printMute);
-                        if (errors) {
-                            rej(ret.setErrorInfo(errors, `\n${errors.join('\n')}`));
+                        const errMsgs = this.processWpStats(stats, print, printMute);
+                        if (errMsgs) {
+                            rej(ret.setErrorInfo(errMsgs, `\n${errMsgs.join('\n')}`));
                         } else {
                             res();
                         }
@@ -96,7 +96,7 @@ class BundleTask {
             this.processInfoObjects('⚠️ ', info.warnings, print);
         }
 
-        let errMsgs = undefined;
+        let errMsgs = null;
         if (stats.hasErrors()) {
             errMsgs = this.processInfoObjects('❌ ', info.errors, printMute || print);
 
