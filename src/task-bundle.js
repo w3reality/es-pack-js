@@ -116,9 +116,20 @@ class BundleTask {
 
     static processInfoObjects(ty, objs, print) {
         // console.log('processInfoObjects(): objs:', objs);
+
         const msgs = objs.map(obj => {
             const { moduleName, loc, message } = obj;
-            return `${ty} [${moduleName}@${loc}] ${message}\n`;
+
+            let trace = '';
+            if (obj.moduleTrace.length > 0) {
+                const _trace = obj.moduleTrace.map(tr => {
+                    const deps = tr.dependencies.map(dep => dep.loc).join(' ');
+                    return `${tr.originName} ${deps}`;
+                }).join('\n');
+                trace = `\nTrace:\n${_trace}\n`;
+            }
+
+            return `${ty} [${moduleName}@${loc}] ${message}\n${trace}`;
         });
         msgs.forEach(msg => print(msg));
         return msgs;
