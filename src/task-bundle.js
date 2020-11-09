@@ -223,7 +223,41 @@ class BundleTask {
             throw 'exiting...';
         }
 
-        const localNodeModules = `${__dirname}/../node_modules`;
+        // Work around the "polyfill node bindings" breaking change from Webpack 4 to 5
+        // https://github.com/webpack/webpack/pull/8460/files
+        const polyfillNodeModulesDir = `${__dirname}/../node-polyfill/node_modules`;
+        const previouslyPolyfilledBuiltinModules = {
+            assert: "assert",
+            buffer: "buffer",
+            console: "console-browserify",
+            constants: "constants-browserify",
+            crypto: "crypto-browserify",
+            domain: "domain-browser",
+            events: "events",
+            http: "stream-http",
+            https: "https-browserify",
+            os: "os-browserify/browser",
+            path: "path-browserify",
+            punycode: "punycode",
+            process: "process/browser",
+            querystring: "querystring-es3",
+            stream: "stream-browserify",
+            _stream_duplex: "readable-stream/duplex",
+            _stream_passthrough: "readable-stream/passthrough",
+            _stream_readable: "readable-stream/readable",
+            _stream_transform: "readable-stream/transform",
+            _stream_writable: "readable-stream/writable",
+            string_decoder: "string_decoder",
+            sys: "util",
+            timers: "timers-browserify",
+            tty: "tty-browserify",
+            url: "url",
+            util: "util",
+            vm: "vm-browserify",
+            zlib: "browserify-zlib"
+        };
+
+        const localNodeModulesDir = `${__dirname}/../node_modules`;
         return {
             plugins,
             watch: isDev,
@@ -256,17 +290,17 @@ class BundleTask {
                 rules: [
                     {
                         test: /(\.jsx|\.js)$/,
-                        loader: `${localNodeModules}/babel-loader`,
+                        loader: `${localNodeModulesDir}/babel-loader`,
                         options: { // instead of .babelrc -- https://github.com/babel/babel-loader#usage
-                            presets: [[`${localNodeModules}/@babel/preset-env`, {modules: false}]]
+                            presets: [[`${localNodeModulesDir}/@babel/preset-env`, {modules: false}]]
                         },
                         exclude: /(node_modules|bower_components)/
                     },
                     {
                         test: /(\.jsx|\.js)$/,
-                        loader: `${localNodeModules}/eslint-loader`,
+                        loader: `${localNodeModulesDir}/eslint-loader`,
                         options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
-                            parser: `${localNodeModules}/babel-eslint`
+                            parser: `${localNodeModulesDir}/babel-eslint`
                         },
                         exclude: /node_modules/
                     }
@@ -274,9 +308,11 @@ class BundleTask {
             },
             resolve: {
                 modules: [
+                    path.resolve(`${baseDir}/src`),
                     path.resolve(`${baseDir}/node_modules`),
-                    path.resolve(`${baseDir}/src`)
+                    path.resolve(polyfillNodeModulesDir)
                 ],
+                fallback: previouslyPolyfilledBuiltinModules,
                 extensions: ['.json', '.js']
             }
         };

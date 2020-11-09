@@ -1,0 +1,36 @@
+{
+    "private": true,
+    "name": "node-polyfill",
+    "version": "0.1.0",
+    "description": "",
+    "author": "j-devel",
+    "scripts": {
+        "install": "npm i assert buffer console-browserify constants-browserify crypto-browserify domain-browser events stream-http https-browserify os-browserify path-browserify punycode process querystring-es3 stream-browserify readable-stream string_decoder util timers-browserify tty-browserify url util vm-browserify browserify-zlib"
+    },
+    "license": "MIT",
+    "dependencies": {
+        "assert": "^2.0.0",
+        "browserify-zlib": "^0.2.0",
+        "buffer": "^6.0.1",
+        "console-browserify": "^1.2.0",
+        "constants-browserify": "^1.0.0",
+        "crypto-browserify": "^3.12.0",
+        "domain-browser": "^4.19.0",
+        "events": "^3.2.0",
+        "https-browserify": "^1.0.0",
+        "os-browserify": "^0.3.0",
+        "path-browserify": "^1.0.1",
+        "process": "^0.11.10",
+        "punycode": "^2.1.1",
+        "querystring-es3": "^0.2.1",
+        "readable-stream": "^3.6.0",
+        "stream-browserify": "^3.0.0",
+        "stream-http": "^3.1.1",
+        "string_decoder": "^1.3.0",
+        "timers-browserify": "^2.0.12",
+        "tty-browserify": "0.0.1",
+        "url": "^0.11.0",
+        "util": "^0.12.3",
+        "vm-browserify": "^1.1.2"
+    }
+}

@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.4.0-dev.1",
+    "version": "0.4.0-dev.2",
     "description": "Build and test portable JavaScript modules",
     "bin": {
         "es-pack": "bin/es-pack"
@@ -8,6 +8,7 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
+        "postinstall": "(cd ./node-polyfill && npm run install);",
         "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:ex",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
