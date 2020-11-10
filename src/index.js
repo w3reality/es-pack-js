@@ -106,10 +106,11 @@ class EsPack {
             __log('@@ resolve `pkgName`: caught err.code:', err.code);
         }
 
-        const { ba, verify, rustwasm, devWithTts } = _argv;
+        const { ba, verify, rustwasm, dev, devWithTts } = _argv;
+        const mods = _argv.module; // fallback is ['umd'] per `processYargs()`
         return {
             basedir, extConfig,
-            modarray: (_argv.dev || devWithTts) ? ['dev'] : (_argv.module || ['umd']),
+            modarray: (dev || devWithTts) ? [`dev-${mods[0]}`] : mods,
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || this.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
             outdir: _argv.outDir || `${basedir}/target`,
@@ -150,7 +151,7 @@ class EsPack {
 
         if (buildConfig.verify) {
             for (let [modtype, wpConfig] of Object.entries(cache)) {
-                if (modtype === 'dev') continue;
+                if (modtype.startsWith('dev-')) continue;
 
                 const { path, filename, library: libobjname } = wpConfig.output;
                 const { onVerify } = extConfig || {};

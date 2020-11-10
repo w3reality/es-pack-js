@@ -206,16 +206,19 @@ class BundleTask {
             plugins.push(new BundleAnalyzerPlugin());
         }
 
-        const isDev = modType === 'dev';
-        let outputFile, minimize, target;
-        if (modType === 'umd' || isDev) {
-            minimize = !isDev;
+        __log('@@ modType:', modType);
+        const isDev = modType.startsWith('dev-');
+        const minimize = !isDev;
+        let outputFile, target;
+
+        if (modType.endsWith('umd')) {
             outputFile = `${libName}${isDev ? '.js' : '.min.js'}`;
             target = 'umd';
-        } else if (modType === 'esm' || modType === 'esm-compat') {
+        } else if (modType.endsWith('esm') || modType.endsWith('esm-compat')) {
             const isCompat = modType.endsWith('-compat');
-            minimize = true;
-            outputFile = libName + (isCompat ? '.esm.compat.js' : '.esm.js');
+            const dotCompat = isCompat ? '.compat' : '';
+            const dotDev = isDev ? '.dev' : '';
+            outputFile = `${libName}.esm${dotCompat}${dotDev}.js`;
             target = 'var';
             plugins.push(new Var2EsmPlugin(libObjName, outputFile, isCompat));
         } else {
