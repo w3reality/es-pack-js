@@ -129,7 +129,8 @@ class BundleTask {
             }
 
             const { moduleName, loc, message } = obj;
-            return `${ty} [${moduleName}@${loc}] ${message}\n${trace}`;
+            const where = moduleName ? `[${moduleName}@${loc}] ` : '';
+            return `${ty} ${where}${message}\n${trace}`;
         });
         msgs.forEach(msg => print(msg));
         return msgs;
