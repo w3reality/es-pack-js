@@ -159,12 +159,12 @@ class BundleTask {
 
         // TODO get filtered module list as the 'standard' webpack output
         // for (let mod of info.modules) {
-        //     print(`[${mod.id}] ${mod.name} (${mod.size} bytes) ${_how(mod)}`);
+        //     print(`[${mod.id}] ${mod.name} (${mod.size.toLocaleString()} bytes) ${_how(mod)}`);
         // }
 
         print(`${new Date().toLocaleString('default')} (${info.time}ms) | output path: ${info.outputPath}`);
         for (let asset of info.assets) {
-            print(`✨ ${asset.name} (${asset.size} bytes) ${_how(asset)}`);
+            print(`✨ ${asset.name} (${asset.size.toLocaleString()} bytes) ${_how(asset)}`);
         }
     }
 
