@@ -1,11 +1,5 @@
 
 class Meta {
-    static consoleLog(...args) {
-        // for eluding uglify
-        const _console = console;
-        _console.log.apply(_console, args);
-    }
-
     // https://github.com/w3reality/three-geo/issues/25#issuecomment-735853553
     // FIXME: Not reliably working!!
     static isNodeJS() {

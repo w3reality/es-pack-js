@@ -283,9 +283,9 @@ class BundleTask {
                 minimizer: [
                     new TerserPlugin({
                         terserOptions: {
-                            compress: {
-                                drop_console: true
-                            }
+                            // compress: { drop_console: true }
+                            //==== https://github.com/webpack-contrib/terser-webpack-plugin/issues/57
+                            compress: { pure_funcs: ['console.debug', 'console.log'] }
                         }
                     })
                 ]
