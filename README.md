@@ -1,3 +1,9 @@
+# es-pack-js
+
+![](https://github.com/w3reality/es-pack-js/workflows/Node.js%20CI/badge.svg)
+
+Build and test portable JavaScript modules
+
 ## Getting started
 
 Setting up in an NPM project:
