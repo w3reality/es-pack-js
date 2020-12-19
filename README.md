@@ -1,6 +1,15 @@
 # es-pack-js
 
-![](https://github.com/w3reality/es-pack-js/workflows/Node.js%20CI/badge.svg)
+[![NPM][npm-badge]][npm-url]
+[![MIT licensed][mit-badge]][mit-url]
+[![CI][actions-badge]][actions-url]
+
+[npm-badge]: https://img.shields.io/npm/v/es-pack-js.svg
+[npm-url]: https://www.npmjs.com/package/es-pack-js
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-url]: https://github.com/w3reality/es-pack-js/blob/master/LICENSE
+[actions-badge]: https://github.com/w3reality/es-pack-js/workflows/CI/badge.svg
+[actions-url]: https://github.com/w3reality/es-pack-js/actions
 
 Build and test portable JavaScript modules
 
