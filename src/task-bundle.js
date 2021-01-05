@@ -1,14 +1,14 @@
 const path = require('path');
 const fs = require('fs-extra');
-const { encode, decode } = require('base64-arraybuffer');
 const { exec } = require('child_process');
 
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const Var2EsmPlugin = require('./var2esm');
+const Rustwasm = require('./rustwasm');
 
-const { Ret, toUnderscores } = require('./utils');
+const { Ret } = require('./utils');
 
 class BundleTask {
     constructor(wpConfig, buildConfig) {
@@ -26,14 +26,8 @@ class BundleTask {
         __log('@@ output.filename:', output.filename);
 
         const { rustwasm, basedir, outdir, pkgName } = buildConfig;
-        if (rustwasm) { // TODO !!!! move to src/rustwasm.js
-            const crateDir = path.resolve(basedir);
-            const crateNameUnderscored = toUnderscores(pkgName);
-            const outDir = path.resolve(outdir);
-            __log('[rustwasm] crateDir:', crateDir);
-            __log('[rustwasm] crateNameUnderscored:', crateNameUnderscored);
-            __log('[rustwasm] outDir:', outDir);
-            BundleTask.pkgEsmJs(crateDir, crateNameUnderscored, outDir);
+        if (rustwasm) {
+            Rustwasm.generatePkgEsmJs(basedir, outdir, pkgName);
         }
 
         try {
@@ -42,49 +36,6 @@ class BundleTask {
 
         return ret;
     }
-
-    //======== TODO !!!! move to src/rustwasm.js
-    static pkgEsmJs(crateDir, crateNameUnderscored, outDir) {
-        const pkgEsmFile = `${outDir}/__pkg.esm.js`;
-
-        fs.writeFileSync(pkgEsmFile, ''); // create a new file
-
-        let pkgFile = `${crateDir}/pkg/${crateNameUnderscored}.js`;
-        fs.appendFileSync(pkgEsmFile,
-            `const pkgJs = '${this.encodeFileSync(pkgFile)}';\n`);
-
-        pkgFile = `${crateDir}/pkg/${crateNameUnderscored}_bg.wasm`;
-        fs.appendFileSync(pkgEsmFile,
-            `const pkgWasm = '${this.encodeFileSync(pkgFile)}';\n`);
-
-        fs.appendFileSync(pkgEsmFile,
-            'export { pkgJs, pkgWasm };\n');
-    }
-    static encodeFileSync(filePath) {
-        const buffer = fs.readFileSync(filePath);
-        const bufferNew = encode(buffer);
-
-        const inflation = (bufferNew.length - buffer.length) / buffer.length * 100.0;
-        __log(`[rustwasm] base64-encode: ${buffer.length} -> ${bufferNew.length} bytes (${inflation.toFixed(1)}% inflation) for\n  ${filePath}`);
-
-        return bufferNew;
-    }
-    static catFile(src, dest) {
-        return new Promise((res, rej) => {
-            try {
-                const rs = fs.createReadStream(src);
-                const ws = fs.createWriteStream(dest, {flags: 'a'});
-                ws.on('close', () => {
-                    __log('catFile(): done:', src, dest);
-                    res();
-                });
-                rs.pipe(ws);
-            } catch (err) {
-                rej(err);
-            }
-        });
-    }
-    //======== end TODO !!!! move to src/rustwasm.js
 
     static devWithTtsFeedback(hasErrors) {
         const cmdSay = '/usr/bin/say'; // macOS
