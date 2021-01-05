@@ -27,14 +27,15 @@ class Rustwasm {
         fs.appendFileSync(pkgEsmFile,
             'export { pkgJs, pkgWasm };\n');
     }
+    static logInflation(tag, input, output, filePath) {
+        const inflation = (output.length - input.length) / input.length * 100.0;
+        __log(`${tag}: ${input.length} -> ${output.length} bytes (${inflation.toFixed(1)}% inflation) for\n  ${filePath}`);
+    }
     static encodeFileSync(filePath) {
-        const buffer = fs.readFileSync(filePath);
-        const bufferNew = encode(buffer);
-
-        const inflation = (bufferNew.length - buffer.length) / buffer.length * 100.0;
-        __log(`[rustwasm] base64-encode: ${buffer.length} -> ${bufferNew.length} bytes (${inflation.toFixed(1)}% inflation) for\n  ${filePath}`);
-
-        return bufferNew;
+        const abIn = fs.readFileSync(filePath);
+        const abOut = encode(abIn);
+        this.logInflation('[rustwasm] base64-encode', abIn, abOut, filePath);
+        return abOut;
     }
     static catFile(src, dest) {
         return new Promise((res, rej) => {
