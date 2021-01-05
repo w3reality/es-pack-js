@@ -27,7 +27,7 @@ $ npm i -D es-pack-js  # ⬇️
 Invoking the `es-pack` command:
 
 ```
-$ ./node_modules/es-pack-js/bin/es-pack
+$ npx es-pack  # invokes ./node_modules/es-pack-js/bin/es-pack
 es-pack 0.3.5
 usage: es-pack <Command> [Options]
 
@@ -45,7 +45,7 @@ Building an UMD module:
 ```
 $ mkdir src
 $ echo 'export default function add(x, y) { return x + y; }' > src/index.js
-$ ./node_modules/es-pack-js/bin/es-pack build
+$ npx es-pack build
 es-pack 0.3.5
 
 task-bundle: 🌀 spinning...
@@ -69,7 +69,7 @@ Type ".help" for more information.
 Building modules with the `-m` option:
 
 ```
-$ ./node_modules/es-pack-js/bin/es-pack build -m umd esm esm-compat
+$ npx es-pack build -m umd esm esm-compat
 es-pack 0.3.5
 
 task-bundle: 🌀 spinning...
@@ -91,7 +91,7 @@ task-bundle: ✅ done
 More options:
 
 ```
-$ ./node_modules/es-pack-js/bin/es-pack build -h
+$ npx es-pack build -h
 es-pack 0.3.5
 usage: es-pack build [<path>=.] [Options]
 
