@@ -3,18 +3,35 @@ import { decode } from 'base64-arraybuffer';
 import { pkgJs, pkgWasm } from '__pkg.esm.js';
 
 export default class Inflater {
-    static async new() {
+    constructor() {
+        this._isInitialized = false;
+        this._wbg = null;
+        this._wasm = null;
+
         // TODO !!!! polyfill `TextDecoder` stuff for Node.js
-        const initJs = new TextDecoder().decode(this.getPkgJs());
+        const initJs = new TextDecoder().decode(Inflater.getPkgJs());
 
         // Create the 'pure' version of the wasm_bindgen's `init()`
-        const init = (new Function(`return () => { ${initJs} return wasm_bindgen; };`))
+        const _init = (new Function(`return () => { ${initJs} return wasm_bindgen; };`))
             .call(null);
 
-        const wbg = init();
-        const wasm = await wbg(this.getPkgWasm());
+        this._wbg = _init();
+    }
+    async init() {
+        if (this._isInitialized) {
+            throw new Error("Already initialized");
+        } else {
+            this._isInitialized = true;
+        }
 
-        return { wbg, wasm };
+        this._wasm = await this._wbg(Inflater.getPkgWasm());
+        return this._wbg;
+    }
+    static async new() { // suger
+        return await (new Inflater()).init();
+    }
+    getWasm() {
+        return this._wasm;
     }
 
     // Return `ArrayBuffer` representation of bundled wasm-pack pkg files
