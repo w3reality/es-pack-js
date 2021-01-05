@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
+const { encode, decode } = require('base64-arraybuffer');
 const { exec } = require('child_process');
 
 const webpack = require('webpack');
@@ -7,7 +8,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const Var2EsmPlugin = require('./var2esm');
 
-const { Ret } = require('./utils');
+const { Ret, toUnderscores } = require('./utils');
 
 class BundleTask {
     constructor(wpConfig, buildConfig) {
@@ -19,9 +20,21 @@ class BundleTask {
         const { wpConfig, buildConfig } = this;
         const ret = new Ret();
 
-        const { output } = wpConfig;
+        const { entry, output } = wpConfig;
+        __log('@@ entry:', entry);
         __log('@@ output.path:', output.path);
         __log('@@ output.filename:', output.filename);
+
+        const { rustwasm, basedir, outdir, pkgName } = buildConfig;
+        if (rustwasm) { // TODO !!!! move to src/rustwasm.js
+            const crateDir = path.resolve(basedir);
+            const crateNameUnderscored = toUnderscores(pkgName);
+            const outDir = path.resolve(outdir);
+            __log('[rustwasm] crateDir:', crateDir);
+            __log('[rustwasm] crateNameUnderscored:', crateNameUnderscored);
+            __log('[rustwasm] outDir:', outDir);
+            BundleTask.pkgEsmJs(crateDir, crateNameUnderscored, outDir);
+        }
 
         try {
             await BundleTask._run(wpConfig, buildConfig, ret);
@@ -29,6 +42,49 @@ class BundleTask {
 
         return ret;
     }
+
+    //======== TODO !!!! move to src/rustwasm.js
+    static pkgEsmJs(crateDir, crateNameUnderscored, outDir) {
+        const pkgEsmFile = `${outDir}/__pkg.esm.js`;
+
+        fs.writeFileSync(pkgEsmFile, ''); // create a new file
+
+        let pkgFile = `${crateDir}/pkg/${crateNameUnderscored}.js`;
+        fs.appendFileSync(pkgEsmFile,
+            `const pkgJs = '${this.encodeFileSync(pkgFile)}';\n`);
+
+        pkgFile = `${crateDir}/pkg/${crateNameUnderscored}_bg.wasm`;
+        fs.appendFileSync(pkgEsmFile,
+            `const pkgWasm = '${this.encodeFileSync(pkgFile)}';\n`);
+
+        fs.appendFileSync(pkgEsmFile,
+            'export { pkgJs, pkgWasm };\n');
+    }
+    static encodeFileSync(filePath) {
+        const buffer = fs.readFileSync(filePath);
+        const bufferNew = encode(buffer);
+
+        const inflation = (bufferNew.length - buffer.length) / buffer.length * 100.0;
+        __log(`[rustwasm] base64-encode: ${buffer.length} -> ${bufferNew.length} bytes (${inflation.toFixed(1)}% inflation) for\n  ${filePath}`);
+
+        return bufferNew;
+    }
+    static catFile(src, dest) {
+        return new Promise((res, rej) => {
+            try {
+                const rs = fs.createReadStream(src);
+                const ws = fs.createWriteStream(dest, {flags: 'a'});
+                ws.on('close', () => {
+                    __log('catFile(): done:', src, dest);
+                    res();
+                });
+                rs.pipe(ws);
+            } catch (err) {
+                rej(err);
+            }
+        });
+    }
+    //======== end TODO !!!! move to src/rustwasm.js
 
     static devWithTtsFeedback(hasErrors) {
         const cmdSay = '/usr/bin/say'; // macOS
@@ -200,6 +256,7 @@ class BundleTask {
         const libObjName = wpSeed.libobjname || 'MyMod'; // name for script tag loading
         const outDir = wpSeed.outdir;
         const baseDir = wpSeed.basedir;
+        const rustwasm = wpSeed.rustwasm;
 
         const plugins = [];
 
@@ -227,10 +284,22 @@ class BundleTask {
             throw 'exiting...';
         }
 
+        const modules = [];
+        const performance = {};
+
+        if (rustwasm) {
+            modules.push(path.resolve(outDir)); // for importing generated js files
+            modules.push(path.resolve(`${__dirname}/../rustwasm-polyfill/node_modules`));
+            performance.hints = false;
+        } else {
+            modules.push(path.resolve(`${baseDir}/src`));
+            modules.push(path.resolve(`${baseDir}/node_modules`));
+        }
+
         // Work around the "polyfill node bindings" breaking change from Webpack 4 to 5
         // https://github.com/webpack/webpack/pull/8460/files
-        const polyfillNodeModulesDir = `${__dirname}/../node-polyfill/node_modules`;
-        const previouslyPolyfilledBuiltinModules = {
+        modules.push(path.resolve(`${__dirname}/../node-polyfill/node_modules`));
+        const fallback = {
             assert: "assert",
             buffer: "buffer",
             console: "console-browserify",
@@ -266,7 +335,7 @@ class BundleTask {
             plugins,
             watch: isDev,
             mode: isDev ? 'development' : 'production',
-            entry: path.resolve(`${baseDir}/src/index.js`),
+            entry: rustwasm ? `${__dirname}/../rustwasm-polyfill/src/index.js` : path.resolve(`${baseDir}/src/index.js`),
             externals: { // https://webpack.js.org/configuration/externals/
             },
             output: {
@@ -310,13 +379,8 @@ class BundleTask {
                     }
                 ]
             },
-            resolve: {
-                modules: [
-                    path.resolve(`${baseDir}/src`),
-                    path.resolve(`${baseDir}/node_modules`),
-                    path.resolve(polyfillNodeModulesDir)
-                ],
-                fallback: previouslyPolyfilledBuiltinModules,
+            performance,
+            resolve: { modules, fallback,
                 extensions: ['.json', '.js']
             }
         };

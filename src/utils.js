@@ -171,8 +171,11 @@ const formatErrorJest = rawRet => {
     return `\n${error.toString()}\n${stdout.trim()}`;
 };
 
+const toUnderscores = str => str.split('-').join('_');
+
 module.exports = {
     Ret, Logger, _colors,
     _execCommand, execCommand, exitCodeOf,
     setupLocalJest, formatErrorJest,
+    toUnderscores,
 };

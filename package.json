@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.4.3-dev.0",
+    "version": "0.4.3-dev.1",
     "description": "Build and test portable JavaScript modules",
     "bin": {
         "es-pack": "bin/es-pack"
@@ -8,7 +8,7 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "postinstall": "(cd ./node-polyfill && npm run install);",
+        "postinstall": "(cd ./node-polyfill && npm run install); (cd ./rustwasm-polyfill && npm i);",
         "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:ex",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
@@ -48,6 +48,7 @@
         "babel-eslint": "^10.1.0",
         "babel-loader": "^8.1.0",
         "babel-plugin-add-module-exports": "^1.0.4",
+        "base64-arraybuffer": "^0.2.0",
         "eslint": "^7.12.1",
         "eslint-loader": "^4.0.2",
         "express": "^4.17.1",

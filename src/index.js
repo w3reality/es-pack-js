@@ -8,7 +8,7 @@ const toml = require('toml');
 const { version } = require('../package.json');
 console.log(`es-pack ${version}`);
 
-const { Ret, Logger, _colors } = require('./utils');
+const { Ret, Logger, _colors, toUnderscores } = require('./utils');
 
 const logger = new Logger();
 global.__log = logger.createFn();
@@ -113,18 +113,14 @@ class EsPack {
             modarray: (dev || devWithTts) ? [`dev-${mods[0]}`] : mods,
             libname: _argv.libName || pkgName, // e.g. 'foo-bar-js'
             libobjname: _argv.libobjName || this.resolveLibObjName(pkgName), // name for script tag loading; e.g. 'FooBarJs'
-            outdir: _argv.outDir || `${basedir}/target`,
-            ba, verify, rustwasm, devWithTts,
+            outdir: _argv.outDir || (rustwasm ? `${basedir}/pkg-es-pack` : `${basedir}/target`),
+            ba, verify, devWithTts,
+            rustwasm, pkgName,
         };
     }
 
     static pushBuildTasks(tasksAcc, buildConfig) {
         __log('@@ buildConfig:', buildConfig);
-
-        if (buildConfig.rustwasm) {
-            throw 'WIP: rustwasm';
-            // gowasm, aswasm, ...
-        }
 
         const cache = {};
         const { extConfig } = buildConfig;
@@ -195,15 +191,14 @@ class EsPack {
         return parsed.package.name;
     }
 
-    static toUnderscores(str) { return str.split('-').join('_'); }
     static resolveLibObjName(crateName) {
         // foo -> Foo
         // foo-bar -> FooBar
         // foo_bar -> FooBar
 
-        const _createName = this.toUnderscores(crateName);
+        const _crateName = toUnderscores(crateName);
         // https://stackoverflow.com/a/6661013
-        const camel = _createName.replace(/_([a-z])/g, (m, w) => w.toUpperCase());
+        const camel = _crateName.replace(/_([a-z])/g, (m, w) => w.toUpperCase());
         return camel.replace(/^./, camel[0].toUpperCase());
     }
 
@@ -259,8 +254,9 @@ class EsPack {
                         boolean: true,
                         default: false,
                     },
+                    // 'gowasm', 'aswasm', ...
                     'rustwasm': {
-                        describe: 'WIP: Toggle `rustwasm` mode',
+                        describe: 'Toggle `rustwasm` mode',
                         boolean: true,
                         default: false,
                     },
