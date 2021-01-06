@@ -2,14 +2,19 @@ import 'regenerator-runtime/runtime.js';
 import { decode } from 'base64-arraybuffer';
 import { pkgJs, pkgWasm } from '__pkg.esm.js';
 
-export default class Inflater {
-    constructor() {
+// todo - `--no-modules` check
+export default class Mod {
+    constructor(opts={nodejs: false}) {
         this._isInitialized = false;
         this._wbg = null;
         this._wasm = null;
 
-        // TODO !!!! polyfill `TextDecoder` stuff for Node.js
-        const initJs = new TextDecoder().decode(Inflater.getPkgJs());
+        if (opts.nodejs) {
+            const util = global.require('util');
+            global.TextEncoder = util.TextEncoder;
+            global.TextDecoder = util.TextDecoder;
+        }
+        const initJs = new TextDecoder().decode(Mod.getPkgJs());
 
         // Create the 'pure' version of the wasm_bindgen's `init()`
         const _init = (new Function(`return () => { ${initJs} return wasm_bindgen; };`))
@@ -24,11 +29,11 @@ export default class Inflater {
             this._isInitialized = true;
         }
 
-        this._wasm = await this._wbg(Inflater.getPkgWasm());
+        this._wasm = await this._wbg(Mod.getPkgWasm());
         return this._wbg;
     }
-    static async new() { // suger
-        return await (new Inflater()).init();
+    static async new(opts={nodejs: false}) { // sugar
+        return await (new Mod(opts)).init();
     }
     getWasm() {
         return this._wasm;

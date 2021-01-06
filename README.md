@@ -11,7 +11,7 @@
 [actions-badge]: https://github.com/w3reality/es-pack-js/workflows/CI/badge.svg
 [actions-url]: https://github.com/w3reality/es-pack-js/actions
 
-Build and test portable JavaScript modules
+Build and test portable JavaScript/rustwasm modules
 
 ## Getting started
 
