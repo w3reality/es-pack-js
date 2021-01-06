@@ -26,13 +26,17 @@ class BundleTask {
         __log('@@ output.filename:', output.filename);
 
         const { rustwasm, basedir, outdir, pkgName } = buildConfig;
-        if (rustwasm) {
-            Rustwasm.generatePkgEsmJs(basedir, outdir, pkgName);
-        }
+        const pkgEsmFile = rustwasm ?
+            Rustwasm.generatePkgEsmJs(basedir, outdir, pkgName) : null;
 
         try {
             await BundleTask._run(wpConfig, buildConfig, ret);
         } catch (_) { /* nop */ }
+
+        if (pkgEsmFile) {
+            __log('[rustwasm] cleaning:', pkgEsmFile);
+            fs.removeSync(pkgEsmFile);
+        }
 
         return ret;
     }

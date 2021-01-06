@@ -26,6 +26,8 @@ class Rustwasm {
 
         fs.appendFileSync(pkgEsmFile,
             'export { pkgJs, pkgWasm };\n');
+
+        return pkgEsmFile;
     }
     static logInflation(tag, input, output, filePath) {
         const inflation = (output.length - input.length) / input.length * 100.0;
