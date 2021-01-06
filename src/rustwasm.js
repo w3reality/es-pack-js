@@ -12,6 +12,7 @@ class Rustwasm {
         __log('[rustwasm] crateNameUnderscored:', crateNameUnderscored);
         __log('[rustwasm] outDir:', outDir);
 
+        fs.ensureDirSync(outDir); // https://github.com/jprichardson/node-fs-extra/blob/master/docs/ensureDir-sync.md
         const pkgEsmFile = `${outDir}/__pkg.esm.js`;
 
         fs.writeFileSync(pkgEsmFile, ''); // create a new file
