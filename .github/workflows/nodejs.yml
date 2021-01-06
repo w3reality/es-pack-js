@@ -26,6 +26,14 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
     - run: npm run build --if-present
+    - name: Install rustup
+      run: |
+        curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+        rustup toolchain install stable
+        rustup target add wasm32-unknown-unknown --toolchain stable
+        rustup default stable
+    - name: Install wasm-pack
+      run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
     - run: npm test
       env:
         CI: true
