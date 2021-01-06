@@ -13,7 +13,7 @@
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
         "test:verify": "npm run test:verify:base && npm run test:verify:hoge && npm run test:verify:babel && npm run test:verify:update && npm run test:verify:units",
-        "test:ex": "npm run test:ex:base && npm run test:ex:hoge && npm run test:ex:babel && npm run test:ex:meta",
+        "test:ex": "npm run test:ex:base && npm run test:ex:hoge && npm run test:ex:babel && npm run test:ex:meta && npm run test:ex:rustwasm",
         "test:verify:base": "bin/es-pack build examples/base -m umd esm esm-compat --verify",
         "test:verify:hoge": "bin/es-pack build examples/externals-hoge -m umd esm esm-compat --verify",
         "test:verify:babel": "bin/es-pack build examples/externals-babel -m umd esm esm-compat --verify",
@@ -22,7 +22,8 @@
         "test:ex:base": "bin/es-pack test examples/base --node --browser",
         "test:ex:hoge": "bin/es-pack test examples/externals-hoge --node --browser",
         "test:ex:babel": "bin/es-pack test examples/externals-babel --node --browser",
-        "test:ex:meta": "bin/es-pack build examples/meta -m umd esm esm-compat && bin/es-pack test examples/meta --node --browser"
+        "test:ex:meta": "bin/es-pack build examples/meta -m umd esm esm-compat && bin/es-pack test examples/meta --node --browser",
+        "test:ex:rustwasm": "make -C examples/rustwasm && bin/es-pack build examples/rustwasm -m umd esm esm-compat --rustwasm && bin/es-pack test examples/rustwasm --node --browser"
     },
     "repository": {
         "type": "git",

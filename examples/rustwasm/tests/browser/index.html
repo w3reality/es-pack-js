@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8"/>
+    <title>tests</title>
+</head>
+<body>
+    <script src="__tmp.min.js"></script>
+    <script type="module">
+        const output = {};
+
+        (async () => {
+            // 'raw' access to the `wasm` object
+            const mod = new Add();
+            const wbg = await mod.init();
+            const wasm = mod.getWasm();
+
+            // no object references can be returned!!
+            output['results'] = [
+                (await (new Add()).init()).add(2, 2), // 'plain'
+                (await Add.new()).add(2, 2),          // 'sugar'
+                wbg.add(2, 2),                        // 'raw'
+                typeof wasm['memory'],                // 'raw' 
+            ];
+
+            // store results
+            window['output'] = output;
+        })();
+    </script>
+</body>
+</html>
