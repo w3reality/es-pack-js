@@ -34,6 +34,6 @@ afterAll(async () => {
 test('output', () => {
     expect(typeof output).toBe('object');
 });
-test('misc', () => {
+test('plain/sugar/raw', () => {
     expect(output['results']).toEqual([4, 4, 4, 'object']);
 });
