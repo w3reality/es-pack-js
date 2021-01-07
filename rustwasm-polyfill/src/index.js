@@ -2,7 +2,6 @@ import 'regenerator-runtime/runtime.js';
 import { decode } from 'base64-arraybuffer';
 import { pkgJs, pkgWasm } from '__pkg.esm.js';
 
-// todo - `--no-modules` check
 export default class Mod {
     constructor(opts={nodejs: false}) {
         this._isInitialized = false;
@@ -35,9 +34,9 @@ export default class Mod {
     static async new(opts={nodejs: false}) { // sugar
         return await (new Mod(opts)).init();
     }
-    getWasm() {
-        return this._wasm;
-    }
+
+    // Return the underlying `wasm` object
+    getWasm() { return this._wasm; }
 
     // Return `ArrayBuffer` representation of bundled wasm-pack pkg files
     static getPkgJs() { return decode(pkgJs); }
