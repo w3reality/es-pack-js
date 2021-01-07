@@ -155,7 +155,8 @@ const setupLocalJest = (mode, postfix) => {
     fs.emptyDirSync(espBaseTmp);
     const _cpToDir = (srcDir, srcEntry, dstDir) =>
         fs.copySync(`${srcDir}/${srcEntry}`, `${dstDir}/${srcEntry}`);
-    ['jest.config.js', 'jest.config.browser.js', 'package.json', 'src', 'tests']
+    ['jest.config.js', 'jest.config.browser.js', 'jest.setup.js',
+     'package.json', 'src', 'tests']
         .forEach(ent => _cpToDir(espBase, ent, espBaseTmp));
 
     const jestConfigPath =
