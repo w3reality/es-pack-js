@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.4.3-dev.2",
+    "version": "0.5.0-dev.0",
     "lockfileVersion": 1,
     "requires": true,
     "dependencies": {
