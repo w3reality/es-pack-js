@@ -1,14 +1,7 @@
 import 'regenerator-runtime/runtime.js';
 import { decode } from 'base64-arraybuffer';
-import { pkgJs, pkgWasm } from '__pkg.esm.js';
 
-// !!!! TODO to be arranged by rustwasm.js !!!!
-// if 'ffi/index.js' exists:
-//     cp ffi/* to pkg-es-pack/__ffi/*
-// else
-//     create a dummy pkg-es-pack/__ffi/index.js
-//====
-// TODO clean up pkg-es-pack/__ffi.js after bundle done
+import { pkgJs, pkgWasm } from '__pkg.esm.js';
 import * as ffi from '__ffi/index.js';
 
 class Mod {
