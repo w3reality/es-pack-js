@@ -2,7 +2,16 @@ import 'regenerator-runtime/runtime.js';
 import { decode } from 'base64-arraybuffer';
 import { pkgJs, pkgWasm } from '__pkg.esm.js';
 
-export default class Mod {
+// !!!! TODO to be arranged by rustwasm.js !!!!
+// if 'ffi/index.js' exists:
+//     cp ffi/* to pkg-es-pack/__ffi/*
+// else
+//     create a dummy pkg-es-pack/__ffi/index.js
+//====
+// TODO clean up pkg-es-pack/__ffi.js after bundle done
+import * as ffi from '__ffi/index.js';
+
+class Mod {
     constructor(opts={nodejs: false}) {
         this._isInitialized = false;
         this._wbg = null;
@@ -31,7 +40,7 @@ export default class Mod {
         this._wasm = await this._wbg(Mod.getPkgWasm());
         return this._wbg;
     }
-    static async new(opts={nodejs: false}) { // sugar
+    static async init(opts={nodejs: false}) { // sugar
         return await (new Mod(opts)).init();
     }
 
@@ -41,4 +50,8 @@ export default class Mod {
     // Return `ArrayBuffer` representation of bundled wasm-pack pkg files
     static getPkgJs() { return decode(pkgJs); }
     static getPkgWasm() { return decode(pkgWasm); }
-};
+}
+
+Mod.ffi = ffi;
+
+export default Mod;

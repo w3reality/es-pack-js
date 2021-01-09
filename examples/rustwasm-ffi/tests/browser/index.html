@@ -10,17 +10,13 @@
         const output = {};
 
         (async () => {
-            // 'raw' access to the `wasm` object
-            const mod = new Add();
-            const wbg = await mod.init();
-            const wasm = mod.getWasm();
+            const Mod = Ffi;
+            const wbg = await Mod.init();
 
             // no object references can be returned!!
             output['results'] = [
-                (await (new Add()).init()).add(2, 2), // 'plain'
-                (await Add.init()).add(2, 2),         // 'sugar'
-                wbg.add(2, 2),                        // 'raw'
-                typeof wasm['memory'],                // 'raw' 
+                typeof Mod.ffi, // 'object'
+                wbg.run(Mod.ffi), // 10
             ];
 
             // store results

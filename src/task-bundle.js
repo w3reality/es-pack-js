@@ -243,9 +243,11 @@ class BundleTask {
         const performance = {};
 
         if (rustwasm) {
-            modules.push(path.resolve(outDir)); // for importing generated js files
             modules.push(path.resolve(`${__dirname}/../rustwasm-polyfill/node_modules`));
             performance.hints = false;
+
+            modules.push(path.resolve(outDir)); // for importing generated js files
+            modules.push(path.resolve(`${baseDir}/node_modules`));
         } else {
             modules.push(path.resolve(`${baseDir}/src`));
             modules.push(path.resolve(`${baseDir}/node_modules`));
