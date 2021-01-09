@@ -40,7 +40,7 @@ class Mod {
         this._wasm = await this._wbg(Mod.getPkgWasm());
         return this._wbg;
     }
-    static async init(opts={nodejs: false}) { // sugar
+    static async create(opts={nodejs: false}) { // sugar
         return await (new Mod(opts)).init();
     }
 

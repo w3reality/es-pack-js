@@ -14,7 +14,7 @@ test('plain', async () => {
     expect(wbg.add(2, 2)).toBe(4);
 });
 test('sugar', async () => {
-    const wbg = await Add.init({nodejs: true});
+    const wbg = await Add.create({nodejs: true});
     expect(wbg.add(2, 2)).toBe(4);
 });
 test('raw', async () => {

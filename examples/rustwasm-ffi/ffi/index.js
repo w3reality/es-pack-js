@@ -2,7 +2,7 @@ class MyClass {
     constructor() {
         this._number = 42;
     }
-    static ctor() { return new MyClass(); } // kludge
+    static create() { return new MyClass(); } // hack
 
     get number() {
         return this._number;

@@ -10,7 +10,7 @@ const __modPath = `${outDir}/${libName}.min.js`;
 const Mod = require(__modPath);
 
 test('MyClass', async () => {
-    const wbg = await Mod.init({nodejs: true});
+    const wbg = await Mod.create({nodejs: true});
     expect(typeof Mod.ffi).toBe('object'); // e.g. {"MyClass": [Function A]}
     expect(wbg.run(Mod.ffi)).toBe(10);
 });

@@ -22,8 +22,8 @@ pub fn run(ffi: Object) -> Result<u32, JsValue> {
 
     //==== Given `my_class`, how to dynamically call `new MyClass()` in Rust?
     // let x: MyClass = ??my_class??;
-    //==== kludge: `MyClass.ctor()`
-    let x: MyClass = Reflect::get(my_class.as_ref(), &"ctor".into())?
+    //==== hack: `MyClass.create()`
+    let x: MyClass = Reflect::get(my_class.as_ref(), &"create".into())?
         .dyn_into::<Function>()?
         .call0(&JsValue::undefined())?
         .into();

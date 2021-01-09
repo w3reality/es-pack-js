@@ -11,7 +11,7 @@
 
         (async () => {
             const Mod = Ffi;
-            const wbg = await Mod.init();
+            const wbg = await Mod.create();
 
             // no object references can be returned!!
             output['results'] = [

@@ -18,7 +18,7 @@
             // no object references can be returned!!
             output['results'] = [
                 (await (new Add()).init()).add(2, 2), // 'plain'
-                (await Add.init()).add(2, 2),         // 'sugar'
+                (await Add.create()).add(2, 2),         // 'sugar'
                 wbg.add(2, 2),                        // 'raw'
                 typeof wasm['memory'],                // 'raw' 
             ];
