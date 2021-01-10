@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs-extra');
 const { Ret, execCommand,
     setupLocalJest, formatErrorJest } = require('./utils');
 
@@ -19,6 +20,12 @@ class TestTask {
             const rootDir = path.resolve(tc.basedir);
             ret.err(`@@ preset: ${mode}`);
             ret.err(`@@ rootDir: ${rootDir}`);
+
+            if (!fs.existsSync(`${rootDir}/tests/jest.setup.js`)) {
+                const msg = '[v0.5 breaking change] `es-pack test` strictly requires "<rootDir>/tests/jest.setup.js" which corresponds to the setup file described in https://jestjs.io/docs/en/configuration#setupfilesafterenv-array';
+                ret.setErrorInfo(new Error(msg));
+                return ret;
+            }
 
             const rawRet = await TestTask.runJest(rootDir, mode);
             // console.log('rawRet:', rawRet, '<-- rawRet');
