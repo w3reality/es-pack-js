@@ -4,6 +4,21 @@ const { encode } = require('base64-arraybuffer');
 const { toUnderscores } = require('./utils');
 
 class Rustwasm {
+    static check(basedir, pkgName) {
+        const { pkgJs } = this._resolvePkgFiles(
+            path.resolve(basedir), pkgName);
+
+        // Check whether the crate is built by `wasm-pack build --target no-modules`
+        const tf = fs.readFileSync(pkgJs, 'utf8').trim()
+            .startsWith('let wasm_bindgen;');
+
+        if (tf) {
+            __log('[rustwasm] `--target no-modules` check: looks good');
+        } else {
+            const msg = '`es-pack build --rustwasm` requires that the crate is already compiled by `wasm-pack build --target no-modules`.  Only the `no-modules` target is supported; others (e.g. `bundler`, `nodejs`, and `web`) are not.';
+            throw new Error(msg);
+        }
+    }
     static setup(basedir, outdir, pkgName) {
         const baseDir = path.resolve(basedir);
         const outDir = path.resolve(outdir);
@@ -30,24 +45,27 @@ class Rustwasm {
         fs.removeSync(ffiDirGen);
     }
 
-    static generatePkgEsmJs(baseDir, outDir, pkgName) {
+    static _resolvePkgFiles(baseDir, pkgName) {
         const crateNameUnderscored = toUnderscores(pkgName);
-        __log('[rustwasm] crateNameUnderscored:', crateNameUnderscored);
+        // __log('[rustwasm] crateNameUnderscored:', crateNameUnderscored);
+
+        return {
+            pkgJs: `${baseDir}/pkg/${crateNameUnderscored}.js`,
+            pkgWasm: `${baseDir}/pkg/${crateNameUnderscored}_bg.wasm`,
+        };
+    }
+    static generatePkgEsmJs(baseDir, outDir, pkgName) {
 
         const pkgEsmFile = `${outDir}/__pkg.esm.js`;
 
         fs.writeFileSync(pkgEsmFile, ''); // create a new file
 
-        let pkgFile = `${baseDir}/pkg/${crateNameUnderscored}.js`;
+        const { pkgJs, pkgWasm } = this._resolvePkgFiles(baseDir, pkgName);
         fs.appendFileSync(pkgEsmFile,
-            `const pkgJs = '${this.encodeFileSync(pkgFile)}';\n`);
-
-        pkgFile = `${baseDir}/pkg/${crateNameUnderscored}_bg.wasm`;
+            `const pkgJs = '${this.encodeFileSync(pkgJs)}';\n`);
         fs.appendFileSync(pkgEsmFile,
-            `const pkgWasm = '${this.encodeFileSync(pkgFile)}';\n`);
-
-        fs.appendFileSync(pkgEsmFile,
-            'export { pkgJs, pkgWasm };\n');
+            `const pkgWasm = '${this.encodeFileSync(pkgWasm)}';\n`);
+        fs.appendFileSync(pkgEsmFile, 'export { pkgJs, pkgWasm };\n');
 
         return pkgEsmFile;
     }

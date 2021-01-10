@@ -26,8 +26,17 @@ class BundleTask {
         __log('@@ output.filename:', output.filename);
 
         const { rustwasm, basedir, outdir, pkgName } = buildConfig;
-        let rustwasmInfo = rustwasm ?
-            Rustwasm.setup(basedir, outdir, pkgName) : null;
+
+        let rustwasmInfo = null;
+        if (rustwasm) {
+            try {
+                Rustwasm.check(basedir, pkgName);
+            } catch (err) {
+                ret.setErrorInfo(err);
+                return ret;
+            }
+            rustwasmInfo = Rustwasm.setup(basedir, outdir, pkgName);
+        }
 
         try {
             await BundleTask._run(wpConfig, buildConfig, ret);
