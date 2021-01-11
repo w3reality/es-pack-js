@@ -72,9 +72,10 @@ class Rustwasm {
     static generateFfiDir(isDetected, ffiDir, outDir) {
         const ffiDirOut = `${outDir}/__ffi`;
 
-        __log(`[rustwasm] ffiDirOut (via ${isDetected ? 'REFLECTION' : 'DUMMY'}):`, ffiDirOut);
+        __log(`[rustwasm] ffiDirOut (via ${isDetected ? 'SYMLINK' : 'DUMMY'}):`, ffiDirOut);
+        fs.removeSync(ffiDirOut); // Remove the previous one if any
         if (isDetected) {
-            fs.copySync(ffiDir, ffiDirOut);
+            fs.symlinkSync(ffiDir, ffiDirOut);
         } else {
             fs.ensureDirSync(ffiDirOut);
             fs.writeFileSync(`${ffiDirOut}/index.js`, '');
