@@ -30,11 +30,11 @@ class Rustwasm {
         const pkgEsmFileGen = this.generatePkgEsmJs(baseDir, outDir, pkgName);
 
         const ffiDir = path.resolve(`${basedir}/ffi`);
-        const isDetected = fs.existsSync(ffiDir);
-        __log(`[rustwasm] ffiDir: ${isDetected ? 'YES detected '+ffiDir : 'NOT detected'}`);
-        const ffiDirGen = this.generateFfiDir(isDetected, ffiDir, outDir);
+        const hasFfi = fs.existsSync(ffiDir);
+        __log(`[rustwasm] ffiDir: ${hasFfi ? 'YES detected '+ffiDir : 'NOT detected'}`);
+        const ffiDirGen = this.generateFfiDir(hasFfi, ffiDir, outDir);
 
-        return { pkgEsmFileGen, ffiDirGen };
+        return { pkgEsmFileGen, hasFfi, ffiDirGen };
     }
     static clean(info) {
         const { pkgEsmFileGen, ffiDirGen } = info;
@@ -69,12 +69,12 @@ class Rustwasm {
 
         return pkgEsmFile;
     }
-    static generateFfiDir(isDetected, ffiDir, outDir) {
+    static generateFfiDir(hasFfi, ffiDir, outDir) {
         const ffiDirOut = `${outDir}/__ffi`;
 
-        __log(`[rustwasm] ffiDirOut (via ${isDetected ? 'SYMLINK' : 'DUMMY'}):`, ffiDirOut);
+        __log(`[rustwasm] ffiDirOut (via ${hasFfi ? 'SYMLINK' : 'DUMMY'}):`, ffiDirOut);
         fs.removeSync(ffiDirOut); // Remove the previous one if any
-        if (isDetected) {
+        if (hasFfi) {
             fs.symlinkSync(ffiDir, ffiDirOut);
         } else {
             fs.ensureDirSync(ffiDirOut);

@@ -28,6 +28,7 @@ class BundleTask {
         const { rustwasm, basedir, outdir, pkgName } = buildConfig;
 
         let rustwasmInfo = null;
+        let disableWatch = false;
         if (rustwasm) {
             try {
                 Rustwasm.check(basedir, pkgName);
@@ -36,10 +37,11 @@ class BundleTask {
                 return ret;
             }
             rustwasmInfo = Rustwasm.setup(basedir, outdir, pkgName);
+            disableWatch = !rustwasmInfo.hasFfi;
         }
 
         try {
-            await BundleTask._run(wpConfig, buildConfig, ret);
+            await BundleTask._run(wpConfig, buildConfig, disableWatch, ret);
         } catch (_) { /* nop */ }
 
         if (rustwasmInfo) {
@@ -62,7 +64,7 @@ class BundleTask {
         }
     }
 
-    static async _run(wpConfig, buildConfig, ret) {
+    static async _run(wpConfig, buildConfig, disableWatch, ret) {
         return new Promise((res, rej) => {
             try {
                 webpack(wpConfig, (err, stats) => {
@@ -76,7 +78,7 @@ class BundleTask {
                     //     }
                     // }
 
-                    if (wpConfig.watch) {
+                    if (wpConfig.watch && !disableWatch) {
                         const errMsgs = this.processWpStats(stats, console.log);
 
                         if (buildConfig.devWithTts) {
