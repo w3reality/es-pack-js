@@ -84,7 +84,9 @@ class BundleTask {
                         if (buildConfig.devWithTts) {
                             this.devWithTtsFeedback(errMsgs !== null);
                         }
-                        console.log('\n👀');
+
+                        const dirName = buildConfig.rustwasm ? 'ffi' : 'src';
+                        console.log(`\n👀 ${buildConfig.basedir}/${dirName}`);
 
                         // no res/rej; enter looping
                     } else {
