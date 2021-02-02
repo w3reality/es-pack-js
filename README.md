@@ -128,6 +128,10 @@ $ wasm-pack build --target no-modules
 $ es-pack build --rustwasm
 ```
 
+![image](https://w3reality.github.io/es-pack-js/examples/img/rustwasm-add-1.png)
+
+![image](https://w3reality.github.io/es-pack-js/examples/img/rustwasm-add-2.png)
+
 Exercising the generated 'add.min.js' (an 'umd' module) in Node.js:
 
 ```
