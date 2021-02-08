@@ -121,26 +121,70 @@ Options:
 ```
 
 ## The `--rustwasm` mode <a name="sec-rustwasm"></a>
-To transform wasm-pack generated artifacts into standalone umd/esm modules
-usable in browsers/Node.js, try:
+
+We can transform wasm-pack generated artifacts into standalone umd/esm modules
+usable in browsers/Node.js as follows:
 
 ```
 $ wasm-pack build --target no-modules
 $ es-pack build --rustwasm
 ```
 
-Here is a commandline footage using the [rustwasm-add](https://github.com/w3reality/es-pack-js/tree/master/examples/rustwasm-add)
-example project:
+To illustrate in detail, we use this minimal Rust crate: [examples/rustwasm-add](https://github.com/w3reality/es-pack-js/tree/master/examples/rustwasm-add)
 
-![image](https://w3reality.github.io/es-pack-js/examples/img/rustwasm-add-1.png)
+<p><details>
+<summary>wasm-pack build --target no-modules</summary>
 
-![image](https://w3reality.github.io/es-pack-js/examples/img/rustwasm-add-2.png)
+```
+$ wasm-pack build --target no-modules
+[INFO]: 🎯  Checking for the Wasm target...
+[INFO]: 🌀  Compiling to Wasm...
+   Compiling proc-macro2 v1.0.24
+   Compiling unicode-xid v0.2.1
+   Compiling log v0.4.11
+   Compiling syn v1.0.58
+   Compiling wasm-bindgen-shared v0.2.69
+   Compiling cfg-if v0.1.10
+   Compiling bumpalo v3.4.0
+   Compiling lazy_static v1.4.0
+   Compiling wasm-bindgen v0.2.69
+   Compiling cfg-if v1.0.0
+   Compiling quote v1.0.8
+   Compiling wasm-bindgen-backend v0.2.69
+   Compiling wasm-bindgen-macro-support v0.2.69
+   Compiling wasm-bindgen-macro v0.2.69
+   Compiling add v0.1.0 (/Users/foo/es-pack-js/examples/rustwasm-add)
+    Finished release [optimized] target(s) in 22.59s
+⚠️   [WARN]: origin crate has no README
+[INFO]: ⬇️  Installing wasm-bindgen...
+[INFO]: Optimizing wasm binaries with `wasm-opt`...
+[INFO]: Optional fields missing from Cargo.toml: 'description', 'repository', and 'license'. These are not necessary, but recommended
+[INFO]: ✨   Done in 23.24s
+[INFO]: 📦   Your wasm pkg is ready to publish at /Users/foo/es-pack-js/examples/rustwasm-add/pkg.
+```
 
-Exercising the generated 'add.min.js' (an 'umd' module) in Node.js:
+</details></p>
+
+<p><details>
+<summary>es-pack build --rustwasm</summary>
+
+```
+$ es-pack build --rustwasm
+es-pack 0.5.1-dev.0
+
+task-bundle: 🌀 spinning...
+2/8/2021, 11:38:49 AM (2,948 ms) | output path: /Users/foo/es-pack-js/examples/rustwasm-add/pkg-es-pack
+✨ add.min.js (13,282 bytes) [emitted]
+task-bundle: ✅ done
+```
+
+</details></p>
+
+Let's exercise the generated 'add.min.js' (an 'umd' module) in Node.js:
 
 ```
 $ node
-Welcome to Node.js v12.16.1.
+Welcome to Node.js v14.15.4.
 Type ".help" for more information.
 > Mod = require('./pkg-es-pack/add.min.js')
 [Function: t] { ffi: {} }
@@ -156,6 +200,6 @@ we can also generate an 'esm' module with:
 $ es-pack build --rustwasm -m esm
 ```
 
-💡 As a more advanced example using the rustwasm mode, we have [rustwasm-ffi](https://github.com/w3reality/es-pack-js/tree/master/examples/rustwasm-ffi),
+💡 As a more advanced example using the rustwasm mode, we have [examples/rustwasm-ffi](https://github.com/w3reality/es-pack-js/tree/master/examples/rustwasm-ffi),
 where we show how to call JavaScript FFI from within Rust code.
 
