@@ -14,9 +14,9 @@ class Delta {
         this.perf = null;
         this.start = 0;
     }
-    static async new() { return await (new this()).init(); }
-    async init() {
-        if (Meta.isNodeJS()) {
+    static async new(opts={}) { return await (new this()).init(opts); }
+    async init(opts={}) {
+        if (opts.nodejs) {
             const { performance: perf } = await Meta.nodeRequire(global, 'perf_hooks');
             this.perf = perf;
         } else {

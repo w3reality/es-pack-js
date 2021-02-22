@@ -35,5 +35,5 @@ test('output', () => {
     expect(typeof output).toBe('object');
 });
 test('misc', () => {
-    expect(output['results']).toEqual([42, false, 'number']);
+    expect(output['results']).toEqual([42, 'number']);
 });

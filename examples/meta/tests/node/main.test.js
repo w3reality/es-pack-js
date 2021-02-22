@@ -15,10 +15,7 @@ test('`foo.sth`', () => {
     const foo = new Foo();
     expect(foo.sth).toBe(42);
 });
-test('`Meta.isNodeJS()`', () => {
-    expect(Meta.isNodeJS()).toBeTruthy();
-});
 test('`Meta.Delta`', async () => {
-    const delta = await Meta.Delta.new();
+    const delta = await Meta.Delta.new({nodejs: true});
     expect(typeof delta.get()).toBe('number');
 });
