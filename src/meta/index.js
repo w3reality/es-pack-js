@@ -1,11 +1,5 @@
 
 class Meta {
-    // https://github.com/w3reality/three-geo/issues/25#issuecomment-735853553
-    // FIXME: Not reliably working!!
-    static isNodeJS() {
-        return typeof __non_webpack_require__ !== 'undefined';
-    }
-
     static async nodeRequire(_global, mod) { // {classic,es}-context agnostic wrapper
         const req = typeof _global.require === 'function' ? _global.require : null;
         const imp = typeof _global.import === 'function' ? _global.import : null;
