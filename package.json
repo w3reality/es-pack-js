@@ -1,6 +1,6 @@
 {
     "name": "es-pack-js",
-    "version": "0.5.2",
+    "version": "0.5.3-dev.0",
     "description": "Build and test portable JavaScript/rustwasm modules",
     "bin": {
         "es-pack": "bin/es-pack"
