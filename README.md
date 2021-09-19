@@ -24,6 +24,9 @@ starting with a minimal NPM project.
 $ mkdir add
 $ cd add
 $ npm init
+
+$ npm config set script-shell bash  # (required if using Windows)
+
 $ npm i -D es-pack-js  # ⬇️
 ```
 
@@ -117,6 +120,23 @@ Options:
       --debug                  Print debug log and keep intermediate output
                                                       [boolean] [default: false]
 ```
+
+## Windows
+
+### Requirement
+
+Before installing es-pack-js, it is required to run:
+
+```
+$ npm config set script-shell bash
+```
+
+### Limitations
+
+The following command invocations do nothing:
+
+* `es-pack build` subcommand with `--verify` option
+* `ex-pack test` subcommand
 
 ## The `--rustwasm` mode <a name="sec-rustwasm"></a>
 

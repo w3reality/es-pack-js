@@ -8,7 +8,7 @@
     "main": "src/index.js",
     "directories": {},
     "scripts": {
-        "postinstall": "(cd ./node-polyfill && npm run install); (cd ./rustwasm-polyfill && npm i);",
+        "postinstall": "(cd ./node-polyfill && npm run install) && (cd ./rustwasm-polyfill && npm i)",
         "test": "npm run test:node && npm run test:browser && npm run test:verify && npm run test:ex",
         "test:node": "jest tests/node/main.test.js",
         "test:browser": "jest -c jest.config.browser.js tests/browser/main.test.js",
@@ -23,6 +23,7 @@
         "test:ex:hoge": "bin/es-pack test examples/externals-hoge --node --browser",
         "test:ex:babel": "bin/es-pack test examples/externals-babel --node --browser",
         "test:ex:meta": "bin/es-pack build examples/meta -m umd esm esm-compat && bin/es-pack test examples/meta --node --browser",
+        "test:windows": "bin/es-pack build examples/meta -m umd esm esm-compat && jest -c jest.config.js --rootDir examples/meta && jest -c jest.config.browser.js --rootDir examples/meta",
         "test:ex:rustwasm-add": "make -C examples/rustwasm-add ci",
         "test:ex:rustwasm-ffi": "make -C examples/rustwasm-ffi ci"
     },
