@@ -136,7 +136,7 @@ $ npm config set script-shell bash
 The following command invocations do nothing:
 
 * `es-pack build` subcommand with `--verify` option
-* `ex-pack test` subcommand
+* `es-pack test` subcommand
 
 ## The `--rustwasm` mode <a name="sec-rustwasm"></a>
 
