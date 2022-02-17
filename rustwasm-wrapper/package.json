@@ -1,6 +1,6 @@
 {
     "private": true,
-    "name": "rustwasm-polyfill",
+    "name": "rustwasm-wrapper",
     "version": "0.1.0",
     "description": "",
     "author": "j-devel",

@@ -255,7 +255,7 @@ class BundleTask {
         const performance = {};
 
         if (rustwasm) {
-            modules.push(path.resolve(`${__dirname}/../rustwasm-polyfill/node_modules`));
+            modules.push(path.resolve(`${__dirname}/../rustwasm-wrapper/node_modules`));
             performance.hints = false;
 
             modules.push(path.resolve(outDir)); // for importing generated js files
@@ -304,7 +304,7 @@ class BundleTask {
             plugins,
             watch: isDev,
             mode: isDev ? 'development' : 'production',
-            entry: rustwasm ? `${__dirname}/../rustwasm-polyfill/src/index.js` : path.resolve(`${baseDir}/src/index.js`),
+            entry: rustwasm ? `${__dirname}/../rustwasm-wrapper/src/index.js` : path.resolve(`${baseDir}/src/index.js`),
             externals: { // https://webpack.js.org/configuration/externals/
             },
             output: {
