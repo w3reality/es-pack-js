@@ -226,6 +226,8 @@ class BundleTask {
         const baseDir = wpSeed.basedir;
         const rustwasm = wpSeed.rustwasm;
 
+        const localNodeModulesDir = `${__dirname}/../node_modules`;
+
         const plugins = [];
 
         // https://webpack.js.org/plugins/eslint-webpack-plugin/#options
@@ -234,9 +236,9 @@ class BundleTask {
             exclude: ['node_modules', 'bower_components'],
             useEslintrc: false,
             overrideConfig: {
-                parser: '@babel/eslint-parser', // https://eslint.org/docs/user-guide/configuring/plugins#specifying-parser
+                parser: `${localNodeModulesDir}/@babel/eslint-parser`, // https://eslint.org/docs/user-guide/configuring/plugins#specifying-parser
                 rules: {
-                    semi: ['error', 'always'], // https://eslint.org/docs/rules/semi
+                    //semi: ['error', 'always'], // https://eslint.org/docs/rules/semi
                 },
                 //extends: ['airbnb'], // https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb
                 parserOptions: {
@@ -317,7 +319,6 @@ class BundleTask {
             zlib: "browserify-zlib"
         };
 
-        const localNodeModulesDir = `${__dirname}/../node_modules`;
         return {
             plugins,
             watch: isDev,
