@@ -6,6 +6,7 @@ const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const Var2EsmPlugin = require('./var2esm');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const Rustwasm = require('./rustwasm');
 
 const { Ret } = require('./utils');
@@ -227,6 +228,23 @@ class BundleTask {
 
         const plugins = [];
 
+        // https://webpack.js.org/plugins/eslint-webpack-plugin/#options
+        plugins.push(new ESLintPlugin({
+            extensions: ['js', 'jsx'],
+            exclude: ['node_modules', 'bower_components'],
+            useEslintrc: false,
+            overrideConfig: {
+                parser: '@babel/eslint-parser', // https://eslint.org/docs/user-guide/configuring/plugins#specifying-parser
+                rules: {
+                    semi: ['error', 'always'], // https://eslint.org/docs/rules/semi
+                },
+                //extends: ['airbnb'], // https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb
+                parserOptions: {
+                    requireConfigFile: false,
+                },
+            },
+        }));
+
         if (wpSeed.ba) {
             plugins.push(new BundleAnalyzerPlugin());
         }
@@ -338,14 +356,6 @@ class BundleTask {
                         },
                         exclude: /(node_modules|bower_components)/
                     },
-                    {
-                        test: /(\.jsx|\.js)$/,
-                        loader: `${localNodeModulesDir}/eslint-loader`,
-                        options: { // instead of .eslintrc -- https://eslint.org/docs/developer-guide/nodejs-api#cliengine
-                            parser: `${localNodeModulesDir}/babel-eslint`
-                        },
-                        exclude: /node_modules/
-                    }
                 ]
             },
             performance,
