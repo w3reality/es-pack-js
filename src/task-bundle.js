@@ -194,7 +194,7 @@ class BundleTask {
 
     static applyCustom(onBundle, wpConfig) {
         const { filename: filenameOrig, library: libraryOrig } = wpConfig.output;
-        onBundle(wpConfig);
+        onBundle(wpConfig, webpack);
         const { filename, library } = wpConfig.output;
 
         // Update the `Var2EsmPlugin` instance if necessary
