@@ -23,21 +23,23 @@ switch (modType) {
         {
             const unit = 'umd-require';
             takeUnit(unit) ?
-                test(`unit: ${unit}`, () => units[unit](modPath)) :
+                test(`unit: ${unit}`, () => units[unit](modPath, preloadJs)) :
                 testSkipNoTake(unit);
         }
 
         {
             const unit = 'umd-import-static';
             takeUnit(unit) ?
-                test(`unit: ${unit}`, async () => await units[unit](modPath)) :
+                (preloadJs ?
+                    testSkipNoSupport(unit) :
+                    test(`unit: ${unit}`, async () => await units[unit](modPath))) :
                 testSkipNoTake(unit);
         }
 
         {
             const unit = 'umd-import-dynamic';
             takeUnit(unit) ?
-                test(`unit: ${unit}`, async () => await units[unit](modPath)) :
+                test(`unit: ${unit}`, async () => await units[unit](modPath, preloadJs)) :
                 testSkipNoTake(unit);
         }
 
