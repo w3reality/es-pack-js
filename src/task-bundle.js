@@ -356,12 +356,12 @@ class BundleTask {
                             presets: [[`${localNodeModulesDir}/@babel/preset-env`, {modules: false}]]
                         },
                         exclude: /(node_modules|bower_components)/
-                    },
+                    }, { test: /\.tsx?$/, loader: 'ts-loader' }
                 ]
             },
             performance,
             resolve: { modules, fallback,
-                extensions: ['.json', '.js']
+                extensions: ['.ts', '.tsx', '.json', '.js']
             }
         };
     }
