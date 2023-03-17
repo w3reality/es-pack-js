@@ -18,7 +18,7 @@ class Mod {
         const initJs = new TextDecoder().decode(Mod.getPkgJs());
 
         // Create the 'pure' version of the wasm_bindgen's `init()`
-        const _init = (new Function(`return () => { ${initJs} return wasm_bindgen; };`))
+        const _init = (new Function(`return () => { const document = undefined; const location = {}; ${initJs} return wasm_bindgen; };`))
             .call(null);
 
         this._wbg = _init();
