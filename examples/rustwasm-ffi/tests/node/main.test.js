@@ -15,4 +15,4 @@ test('MyClass', async () => {
     expect(typeof Mod.ffi).toBe('object'); // e.g. {"MyClass": [Function A]}
     expect(wbg.run(Mod.ffi)).toBe(10);
 });
-} // !!
+} else { test('dummy', () => {}); } // !!
