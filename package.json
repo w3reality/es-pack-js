@@ -58,7 +58,7 @@
         "express": "^4.17.1",
         "fs-extra": "^9.0.1",
         "jest": "^29.7.0",
-        "puppeteer": "20.9.0",
+        "puppeteer": "19.11.1",
         "terser-webpack-plugin": "^5.3.4",
         "toml": "^3.0.0",
         "ts-loader": "^9.3.1",
