@@ -5,7 +5,8 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    #branches: [ master ]
+    branches: [ debug-puppeteer ]
     paths-ignore:
       - '**/README.md'
   pull_request:
