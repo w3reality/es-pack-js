@@ -21,7 +21,8 @@ let server = null;
 let metaArgs = null;
 
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    //browser = await puppeteer.launch();
+    browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
 
     if (0) { console.error('!! skipping build !!'); } else {
         fs.removeSync(outDir);
