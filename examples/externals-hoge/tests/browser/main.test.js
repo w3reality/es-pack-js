@@ -8,11 +8,14 @@ const modPath = `${outDir}/${libName}.min.js`;
 
 const tmpModPath = `${__dirname}/__tmp.min.js`;
 
+const puppeteer = require('puppeteer');
+let browser = null;
+
 let output;
 let server = null;
 beforeAll(async () => {
-    const serveDir = __dirname;
-    server = await (new Server(serveDir)).listen();
+    browser = await puppeteer.launch();
+    server = await (new Server(__dirname, /* serveDir */)).listen();
 
     const tmpHogePath = path.join(__dirname, './__hoge.js');
     fs.copySync(path.join(__dirname, '../../src/hoge.js'), tmpHogePath);
@@ -30,6 +33,7 @@ beforeAll(async () => {
     fs.removeSync(tmpModPath);
 });
 afterAll(async () => {
+    await browser.close();
     server.close();
     server = null;
 });

@@ -19,18 +19,25 @@ const testSkipNoTake = unit => test(`unit: ${unit} [SKIP: due to \`units.browser
 
 //
 
+const puppeteer = require('puppeteer');
+let browser = null;
+
 const Server = require('./server');
 let server = null;
 
 beforeAll(async () => {
+    browser = await puppeteer.launch();
+
     const serverDir = modDir;
     server = await (new Server(serverDir)).listen();
     console.log('server.port:', server.port);
 
-    metaArgs = [libobjName, serverDir, server.port, preloadJs];
+    metaArgs = [libobjName, browser, serverDir, server.port, preloadJs];
 });
 
 afterAll(async () => {
+    await browser.close();
+
     console.log('closing server!!');
     server.close();
     server = null;

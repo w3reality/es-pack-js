@@ -2,12 +2,16 @@ const path = require('path');
 const esPackJs = path.join(__dirname, '../../../../src/index');
 const EsPack = require(esPackJs); // emulating `require('es-pack-js')`
 
+const puppeteer = require('puppeteer');
+let browser = null;
+
 let server = null;
 beforeAll(async () => {
-    const serveDir = __dirname;
-    server = await (new EsPack.Server(serveDir)).listen();
+    browser = await puppeteer.launch();
+    server = await (new EsPack.Server(__dirname /* serveDir */)).listen();
 });
 afterAll(async () => {
+    await browser.close();
     server.close();
     server = null;
 });

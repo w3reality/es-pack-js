@@ -27,7 +27,7 @@ const setupPreloadJs = (preloadJs, serveDir) => {
     return { tag, copyPath };
 };
 
-const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
+const testTag = async (mod, libobjName, browser, serveDir, port, preloadJs) => {
     console.log('mod:', mod);
     const copyFile = '__copy.min.js';
     const copyPath = `${serveDir}/${copyFile}`;
@@ -59,7 +59,7 @@ const testTag = async (mod, libobjName, serveDir, port, preloadJs) => {
     if (preloadCopyPath) { fs.removeSync(preloadCopyPath); }
 };
 
-const testImport = mode => async (mod, _libobjName, serveDir, port, preloadJs) => {
+const testImport = mode => async (mod, _libobjName, browser, serveDir, port, preloadJs) => {
     console.log('mod:', mod);
     const copyFile = '__copy.esm.js';
     const copyPath = `${serveDir}/${copyFile}`;

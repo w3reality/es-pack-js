@@ -12,12 +12,17 @@ const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
+const puppeteer = require('puppeteer');
+let browser = null;
+
 const Server = require('./server');
 let server = null;
 
 let metaArgs = null;
 
 beforeAll(async () => {
+    browser = await puppeteer.launch();
+
     if (0) { console.error('!! skipping build !!'); } else {
         fs.removeSync(outDir);
         await buildTestModule({ outDir, modPath, libName, libobjName });
@@ -27,10 +32,12 @@ beforeAll(async () => {
     server = await (new Server(serverDir)).listen();
     console.log('server.port:', server.port);
 
-    metaArgs = [libobjName, serverDir, server.port];
+    metaArgs = [libobjName, browser, serverDir, server.port];
 });
 
 afterAll(async () => {
+    await browser.close();
+
     console.log('closing server!!');
     server.close();
     server = null;
