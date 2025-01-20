@@ -226,7 +226,10 @@ class BundleTask {
         const baseDir = wpSeed.basedir;
         const rustwasm = wpSeed.rustwasm;
 
-        const localNodeModulesDir = `${__dirname}/../node_modules`;
+        const localNodeModulesDirV2 = `${__dirname}/../node_modules`; // lockfileVersion: 2
+        const localNodeModulesDirV3 = `${__dirname}/../..`; // lockfileVersion: 3
+        const localNodeModulesDir = fs.existsSync(localNodeModulesDirV2) ?
+            localNodeModulesDirV2 : localNodeModulesDirV3;
 
         const plugins = [];
 
