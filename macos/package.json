@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "macos",
+  "version": "0.1.0",
+  "description": "",
+  "author": "j-devel",
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "21.11.0"
+  }
+}

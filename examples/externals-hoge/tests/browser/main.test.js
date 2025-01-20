@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
-const { Server } = require('../../../../src/index');
+const { Server, getBrowser } = require('../../../../src/index');
 
 const libName = 'no-pkg-name';
 const outDir = path.join(__dirname, '../../target');
@@ -8,13 +8,12 @@ const modPath = `${outDir}/${libName}.min.js`;
 
 const tmpModPath = `${__dirname}/__tmp.min.js`;
 
-const puppeteer = require('puppeteer');
 let browser = null;
 
 let output;
 let server = null;
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await getBrowser();
     server = await (new Server(__dirname, /* serveDir */)).listen();
 
     const tmpHogePath = path.join(__dirname, './__hoge.js');

@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
-const { Server } = require('../../../../src');
+const { Server, getBrowser } = require('../../../../src');
 
 const libName = 'ffi';
 const outDir = path.join(__dirname, '../../pkg-es-pack');
@@ -8,13 +8,12 @@ const modPath = `${outDir}/${libName}.min.js`;
 
 const tmpModPath = `${__dirname}/__tmp.min.js`;
 
-const puppeteer = require('puppeteer');
 let browser = null;
 
 let output;
 let server = null;
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await getBrowser();
     server = await (new Server(__dirname /* serveDir */)).listen();
 
     fs.copySync(modPath, tmpModPath);

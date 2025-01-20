@@ -330,6 +330,7 @@ class EsPack {
 }
 
 const Server = require('../tests/browser/server');
-Object.assign(EsPack, { version, Server })
+const { getBrowser } = require('../tests/browser/browser');
+Object.assign(EsPack, { version, Server, getBrowser })
 
 module.exports = EsPack;

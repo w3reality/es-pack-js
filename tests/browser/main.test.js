@@ -12,7 +12,7 @@ const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
-const puppeteer = require('puppeteer');
+const { getBrowser } = require('./browser');
 let browser = null;
 
 const Server = require('./server');
@@ -21,7 +21,7 @@ let server = null;
 let metaArgs = null;
 
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await getBrowser();
 
     if (0) { console.error('!! skipping build !!'); } else {
         fs.removeSync(outDir);

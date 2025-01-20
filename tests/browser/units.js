@@ -103,6 +103,7 @@ const testImport = mode => async (mod, _libobjName, browser, serveDir, port, pre
 
     expect(await page.evaluate(() => window['foo'])).toBe(42);
 
+    await (new Promise(res => setTimeout(res, 2000))); // for 'dynamic' to work
     let Mod = await page.evaluate(() => window['Mod']);
     console.log(`${mode} import - Mod:`, Mod);
 

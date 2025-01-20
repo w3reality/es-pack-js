@@ -6,6 +6,7 @@ const {
     BROWSER_LIBOBJ_NAME: libobjName,
     BROWSER_PRELOAD_JS: preloadJs,
     BROWSER_UNITS: veriUnits,
+    NODE_PATH: nodePath,
 } = process.env;
 
 if (typeof modType !== 'string') throw new Error('Invalid `modType`');
@@ -19,14 +20,16 @@ const testSkipNoTake = unit => test(`unit: ${unit} [SKIP: due to \`units.browser
 
 //
 
-const puppeteer = require('puppeteer');
+const { getBrowser } = require('./browser');
 let browser = null;
 
 const Server = require('./server');
 let server = null;
 
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    // 'es-pack-sparse-VerifyTask' context
+    const customPuppeteer = require(`${nodePath}/../macos/node_modules/puppeteer`);
+    browser = await getBrowser(customPuppeteer);
 
     const serverDir = modDir;
     server = await (new Server(serverDir)).listen();
