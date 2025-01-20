@@ -22,6 +22,7 @@ const testSkipNoTake = unit => test(`unit: ${unit} [SKIP: due to \`units.browser
 
 const os = require('os');
 const isMacOS = os.platform() === 'darwin';
+const fs = require('fs');
 const { getBrowser } = require('./browser');
 let browser = null;
 
@@ -30,7 +31,12 @@ let server = null;
 
 beforeAll(async () => {
     // 'es-pack-sparse-VerifyTask' context
-    const customPuppeteer = isMacOS ? require(`${nodePath}/../macos/node_modules/puppeteer`) : undefined;
+    const customPuppeteerMacV2 = `${nodePath}/../macos/node_modules/puppeteer`;
+    const customPuppeteerMacV3 = `${nodePath}/es-pack-js/macos/node_modules/puppeteer`;
+    const customPuppeteerMac = fs.existsSync(customPuppeteerMacV2) ?
+        customPuppeteerMacV2 : customPuppeteerMacV3;
+
+    const customPuppeteer = isMacOS ? require(customPuppeteerMac) : undefined;
     browser = await getBrowser(customPuppeteer);
 
     const serverDir = modDir;
