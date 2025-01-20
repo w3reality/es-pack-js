@@ -34,7 +34,7 @@ beforeAll(async () => {
     const customPuppeteerMacUseSelf = `${nodePath}/../macos/node_modules/puppeteer`;
     const customPuppeteerMacUseDep = `${nodePath}/es-pack-js/macos/node_modules/puppeteer`;
     const customPuppeteerMac = fs.existsSync(customPuppeteerMacUseSelf) ?
-        customPuppeteerMacUseSelf : customPuppeteerUseDep;
+        customPuppeteerMacUseSelf : customPuppeteerMacUseDep;
 
     const customPuppeteer = isMacOS ? require(customPuppeteerMac) : undefined;
     browser = await getBrowser(customPuppeteer);
