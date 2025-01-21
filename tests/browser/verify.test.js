@@ -31,13 +31,11 @@ let server = null;
 
 beforeAll(async () => {
     // 'es-pack-sparse-VerifyTask' context
-    const customPuppeteerMacUseSelf = `${nodePath}/../macos/node_modules/puppeteer`;
-    const customPuppeteerMacUseDep = `${nodePath}/es-pack-js/macos/node_modules/puppeteer`;
-    const customPuppeteerMac = fs.existsSync(customPuppeteerMacUseSelf) ?
-        customPuppeteerMacUseSelf : customPuppeteerMacUseDep;
+    const pupMacEspStandalone = `${nodePath}/../macos/node_modules/puppeteer`;
+    const pupMacEspDep = `${nodePath}/es-pack-js/macos/node_modules/puppeteer`;
+    const pupMac = fs.existsSync(pupMacEspStandalone) ? pupMacEspStandalone : pupMacEspDep;
 
-    const customPuppeteer = isMacOS ? require(customPuppeteerMac) : undefined;
-    browser = await getBrowser(customPuppeteer);
+    browser = await getBrowser(isMacOS ? require(pupMac) : undefined);
 
     const serverDir = modDir;
     server = await (new Server(serverDir)).listen();
