@@ -3,3 +3,4 @@ examples/
 */node_modules/
 **/target/
 TODO*
+*/package-lock.json
