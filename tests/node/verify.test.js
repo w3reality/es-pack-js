@@ -18,6 +18,8 @@ const testSkipNoTake = unit => test(`unit: ${unit} [SKIP: due to \`units.node\`]
 
 const testSkipNoSupport = unit => test(`unit: ${unit} [SKIP: static import with \`preloadJs.node\`]`, () => expect(0).toBe(0));
 
+describe(`Test Suite`, () => {
+
 switch (modType) {
     case 'umd':
         {
@@ -91,3 +93,5 @@ switch (modType) {
     default:
         console.log('unsupported modType:', modType);
 }
+
+}); // end of `describe()`

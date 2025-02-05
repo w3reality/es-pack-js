@@ -13,11 +13,12 @@ const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
 const { getBrowser } = require('./browser');
-let browser = null;
-
 const Server = require('./server');
-let server = null;
 
+describe(`Test Suite`, () => {
+
+let browser = null;
+let server = null;
 let metaArgs = null;
 
 beforeAll(async () => {
@@ -47,3 +48,5 @@ test('umd: tag', async () => units['umd-tag'](modUmd, ...metaArgs));
 test('esm: static import', async () => units['esm-import-static'](modEsm, ...metaArgs));
 test('esm: dynamic import', async () => units['esm-import-dynamic'](modEsm, ...metaArgs));
 test('esm-compat: tag', async () => units['esm-compat-tag'](modEsmCompat, ...metaArgs));
+
+}); // end of `describe()`

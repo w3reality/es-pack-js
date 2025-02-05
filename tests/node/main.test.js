@@ -12,6 +12,8 @@ const modUmd = `${outDir}/${libName}.min.js`;
 const modEsm = `${outDir}/${libName}.esm.js`;
 const modEsmCompat = `${outDir}/${libName}.esm.compat.js`;
 
+describe(`Test Suite`, () => {
+
 beforeAll(async () => {
     if (0) { return console.error('!! skipping build !!'); }
 
@@ -84,3 +86,5 @@ test('exit_code: test - noexist', async () => {
 test('exit_code: test - demand at least one preset', async () => {
     expect(await exitCodeOf(`${esp} test ${modPath}`)).toBe('1');
 });
+
+}); // end of `describe()`

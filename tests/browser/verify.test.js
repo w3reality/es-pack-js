@@ -24,9 +24,11 @@ const os = require('os');
 const isMacOS = os.platform() === 'darwin';
 const fs = require('fs');
 const { getBrowser } = require('./browser');
-let browser = null;
-
 const Server = require('./server');
+
+describe(`Test Suite`, () => {
+
+let browser = null;
 let server = null;
 
 beforeAll(async () => {
@@ -74,3 +76,5 @@ switch (modType) {
     default:
         console.log('unsupported modType:', modType);
 }
+
+}); // end of `describe()`
