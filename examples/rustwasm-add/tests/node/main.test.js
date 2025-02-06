@@ -9,6 +9,8 @@ const __modPath = `${outDir}/${libName}.min.js`;
 
 const Add = require(__modPath);
 
+describe('Test Suite', () => {
+
 test('plain', async () => {
     const wbg = await (new Add({nodejs: true})).init();
     expect(wbg.add(2, 2)).toBe(4);
@@ -24,3 +26,5 @@ test('raw', async () => {
     expect(wbg.add(2, 2)).toBe(4);
     expect(typeof wasm['memory']).toBe('object');
 });
+
+}); // end of `describe()`

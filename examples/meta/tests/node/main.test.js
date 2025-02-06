@@ -8,8 +8,9 @@ const __modPath = `${outDir}/${libName}.min.js`;
 // const __modPath = `${outDir}/${libName}.js`; // dev !!
 
 const Foo = require(__modPath);
-
 const { Meta } = Foo;
+
+describe('Test Suite', () => {
 
 test('`foo.sth`', () => {
     const foo = new Foo();
@@ -19,3 +20,5 @@ test('`Meta.Delta`', async () => {
     const delta = await Meta.Delta.new({nodejs: true});
     expect(typeof delta.get()).toBe('number');
 });
+
+}); // end of `describe()`

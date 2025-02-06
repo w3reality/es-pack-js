@@ -8,10 +8,12 @@ const modPath = `${outDir}/${libName}.min.js`;
 
 const tmpModPath = `${__dirname}/__tmp.min.js`;
 
-let browser = null;
+describe('Test Suite', () => {
 
+let browser = null;
 let output;
 let server = null;
+
 beforeAll(async () => {
     browser = await getBrowser();
     server = await (new Server(__dirname /* serveDir */)).listen();
@@ -28,6 +30,7 @@ beforeAll(async () => {
 
     fs.removeSync(tmpModPath);
 });
+
 afterAll(async () => {
     await browser.close();
     server.close();
@@ -40,3 +43,5 @@ test('output', () => {
 test('plain/sugar/raw', () => {
     expect(output['results']).toEqual([4, 4, 4, 'object']);
 });
+
+}); // end of `describe()`

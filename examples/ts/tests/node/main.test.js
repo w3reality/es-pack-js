@@ -8,8 +8,12 @@ const __modPath = `${outDir}/${libName}.min.js`;
 
 const { Student, greeter } = require(__modPath);
 
+describe('Test Suite', () => {
+
 test('misc', () => {
     let user = new Student("Jane", "M.", "User");
     expect(user.lastName).toBe('User');
     expect(greeter(user)).toBe('Hello, Jane User');
 });
+
+}); // end of `describe()`

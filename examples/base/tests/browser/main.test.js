@@ -2,13 +2,16 @@ const path = require('path');
 const esPackJs = path.join(__dirname, '../../../../src/index');
 const EsPack = require(esPackJs); // emulating `require('es-pack-js')`
 
-let browser = null;
+describe(`Test Suite`, () => {
 
+let browser = null;
 let server = null;
+
 beforeAll(async () => {
     browser = await EsPack.getBrowser();
     server = await (new EsPack.Server(__dirname /* serveDir */)).listen();
 });
+
 afterAll(async () => {
     await browser.close();
     server.close();
@@ -29,3 +32,5 @@ test('`page.title()`', async () => {
     await page.goto(`http://localhost:${server.port}/index.html`);
     expect(await page.title()).toBe('42');
 });
+
+}); // end of `describe()`
